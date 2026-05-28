@@ -73,6 +73,7 @@ from server.routes.provider import router as provider_router
 from server.routes.runninghub import router as runninghub_router
 from server.routes.conversation import router as conversation_router
 from server.routes.canvas import router as canvas_router
+from server.routes.asset_library import router as asset_library_router
 from server.services.media_service import (
     output_storage, output_url_for, output_path_for, output_file_from_url,
     origin_from_url, now_ms, sanitize_asset_name, sanitize_export_filename,
@@ -201,6 +202,7 @@ app.include_router(provider_router)
 app.include_router(runninghub_router)
 app.include_router(conversation_router)
 app.include_router(canvas_router)
+app.include_router(asset_library_router)
 
 # Locks and queue (will be migrated to respective stores)
 QUEUE = []
@@ -1105,65 +1107,6 @@ def import_local_image_file(path):
     except OSError:
         raise HTTPException(status_code=500, detail="导入本地图片失败")
     return {"url": output_url_for(filename, "input"), "name": os.path.basename(path) or filename, "kind": "image"}
-
-def default_asset_library():
-    return {
-        "categories": [
-            {"id": "characters", "name": "角色", "type": "image", "items": []},
-            {"id": "scenes", "name": "场景", "type": "image", "items": []},
-            {"id": "workflows", "name": "工作流", "type": "workflow", "items": []},
-        ],
-        "updated_at": now_ms(),
-    }
-
-def load_asset_library():
-    if not os.path.exists(ASSET_LIBRARY_PATH):
-        lib = default_asset_library()
-        save_asset_library(lib)
-        return lib
-    try:
-        with open(ASSET_LIBRARY_PATH, "r", encoding="utf-8") as f:
-            lib = json.load(f)
-    except Exception:
-        lib = default_asset_library()
-    cats = lib.get("categories") if isinstance(lib.get("categories"), list) else []
-    if not any(c.get("type") == "workflow" for c in cats):
-        cats.append({"id": "workflows", "name": "工作流", "type": "workflow", "items": []})
-    lib["categories"] = cats
-    lib["updated_at"] = int(lib.get("updated_at") or now_ms())
-    sort_asset_library_items(lib)
-    return lib
-
-def sort_asset_library_items(lib):
-    for cat in lib.get("categories", []):
-        items = cat.get("items")
-        if isinstance(items, list):
-            def created_at_key(item):
-                if not isinstance(item, dict):
-                    return 0
-                try:
-                    return int(float(item.get("created_at") or 0))
-                except (TypeError, ValueError):
-                    return 0
-            items.sort(key=created_at_key, reverse=True)
-    return lib
-
-def save_asset_library(lib):
-    sort_asset_library_items(lib)
-    lib["updated_at"] = now_ms()
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(ASSET_LIBRARY_PATH, "w", encoding="utf-8") as f:
-        json.dump(lib, f, ensure_ascii=False, indent=2)
-
-def find_asset_category(lib, category_id):
-    for cat in lib.get("categories", []):
-        if cat.get("id") == category_id:
-            return cat
-    return None
-
-
-
-
 
 
 
