@@ -471,3 +471,49 @@ async def upload_video_to_litterbox(path: str, source_url: str) -> Dict[str, str
         raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Litterbox 上传异常：{exc}") from exc
+
+def extract_image(data):
+    candidates = data.get("candidates") if isinstance(data, dict) else None
+    if isinstance(candidates, list):
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                continue
+            content = candidate.get("content") or {}
+            parts = content.get("parts") if isinstance(content, dict) else None
+            if not isinstance(parts, list):
+                continue
+            for part in parts:
+                if not isinstance(part, dict):
+                    continue
+                inline = part.get("inlineData") or part.get("inline_data") or {}
+                if not isinstance(inline, dict):
+                    continue
+                value = inline.get("data")
+                if value:
+                    return {
+                        "type": "b64",
+                        "value": value,
+                        "mime_type": inline.get("mimeType") or inline.get("mime_type") or "image/png",
+                    }
+    if isinstance(data.get("data"), dict) and isinstance(data["data"].get("result"), dict):
+        data = data["data"]
+    if isinstance(data.get("result"), dict):
+        result_images = data["result"].get("images") or []
+        if result_images:
+            first = result_images[0]
+            url = first.get("url")
+            if isinstance(url, list) and url:
+                return {"type": "url", "value": url[0]}
+            if isinstance(url, str) and url:
+                return {"type": "url", "value": url}
+    if isinstance(data.get("data"), dict) and isinstance(data["data"].get("data"), dict):
+        data = data["data"]["data"]
+    images = data.get("data") or []
+    if not isinstance(images, list) or not images:
+        raise HTTPException(status_code=502, detail="生图接口没有返回图片数据")
+    first = images[0]
+    if first.get("url"):
+        return {"type": "url", "value": first["url"]}
+    if first.get("b64_json"):
+        return {"type": "b64", "value": first["b64_json"]}
+    raise HTTPException(status_code=502, detail="无法识别生图接口返回格式")
