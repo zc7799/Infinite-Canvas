@@ -205,6 +205,28 @@ def schedule_self_restart(delay_seconds: int = 3) -> bool:
         return False
 
 
+def sync_static_html_versions():
+    version = current_app_version()
+    if not version:
+        return
+    safe_version = urllib.parse.quote(version, safe="._-")
+    try:
+        for name in os.listdir(STATIC_DIR):
+            if not name.lower().endswith(".html"):
+                continue
+            path = os.path.join(STATIC_DIR, name)
+            if not os.path.isfile(path):
+                continue
+            with open(path, "r", encoding="utf-8") as f:
+                old = f.read()
+            new = re.sub(r'([?&]v=)[^"\'`\s<>)]*', rf'\g<1>{safe_version}', old)
+            if new != old:
+                with open(path, "w", encoding="utf-8", newline="") as f:
+                    f.write(new)
+    except Exception as e:
+        print(f"同步静态页面版本号失败: {e}")
+
+
 def list_update_backups() -> List[Dict[str, Any]]:
     root = os.path.join(DATA_DIR, "update_backups")
     if not os.path.isdir(root):

@@ -1,12 +1,18 @@
 """Chat 辅助服务：提供商解析、响应解析、错误提示"""
+import asyncio
 import json
 import os
 import re
+import time
 
+import httpx
 from fastapi import HTTPException
 
 from server.config import (
-    AI_API_KEY, AI_BASE_URL, CHAT_MODEL,
+    AI_API_KEY, AI_BASE_URL,
+    APIMART_IMAGE_INITIAL_POLL_DELAY, APIMART_IMAGE_POLL_INTERVAL,
+    APIMART_IMAGE_TASK_TIMEOUT, CHAT_MODEL,
+    IMAGE_POLL_INTERVAL, IMAGE_TASK_TIMEOUT,
     MODELSCOPE_API_KEY, MODELSCOPE_CHAT_BASE_URL, MODELSCOPE_CHAT_MODELS,
 )
 from server.models import AIReference
@@ -19,6 +25,7 @@ from server.services.media_service import (
 from server.services.provider_service import (
     bearer_auth_value,
     get_api_provider,
+    is_apimart_provider,
     is_volcengine_provider,
     provider_key_env,
     provider_protocol,
@@ -262,3 +269,36 @@ def upstream_message_from_record(item):
     if not content_parts:
         return None
     return {"role": role, "content": content_parts}
+
+
+async def wait_for_image_task(client, task_id, provider=None):
+    base_url = (provider.get("base_url") if provider else AI_BASE_URL).rstrip("/")
+    is_apimart = is_apimart_provider(provider)
+    if is_apimart:
+        task_url = f"{base_url}/tasks/{task_id}" if base_url.endswith("/v1") else f"{base_url}/v1/tasks/{task_id}"
+    else:
+        task_url = f"{base_url}/images/tasks/{task_id}" if base_url.endswith("/v1") else f"{base_url}/v1/images/tasks/{task_id}"
+    timeout = APIMART_IMAGE_TASK_TIMEOUT if is_apimart else IMAGE_TASK_TIMEOUT
+    interval = APIMART_IMAGE_POLL_INTERVAL if is_apimart else IMAGE_POLL_INTERVAL
+    initial_delay = APIMART_IMAGE_INITIAL_POLL_DELAY if is_apimart else 0
+    deadline = time.monotonic() + timeout
+    last_payload = {}
+    while time.monotonic() < deadline:
+        if initial_delay:
+            await asyncio.sleep(min(initial_delay, max(0.0, deadline - time.monotonic())))
+            initial_delay = 0
+            if time.monotonic() >= deadline:
+                break
+        response = await client.get(task_url, headers=api_headers(provider=provider))
+        response.raise_for_status()
+        last_payload = response.json()
+        task_data = last_payload.get("data") if isinstance(last_payload.get("data"), dict) else last_payload
+        status = str(task_data.get("status") or task_data.get("task_status") or "").upper()
+        if status in {"SUCCESS", "SUCCEED", "SUCCEEDED", "COMPLETED", "COMPLETE", "DONE", "FINISHED", "OK", "READY"}:
+            return last_payload
+        if status in {"FAILURE", "FAILED", "FAIL", "ERROR", "ERRORED", "CANCELED", "CANCELLED", "TIMEOUT", "REJECTED", "EXPIRED"}:
+            error = task_data.get("error") if isinstance(task_data.get("error"), dict) else {}
+            reason = task_data.get("fail_reason") or task_data.get("message") or error.get("message") or last_payload.get("message") or "生图任务失败"
+            raise HTTPException(status_code=502, detail=f"生图任务失败：{reason}")
+        await asyncio.sleep(min(interval, max(0.0, deadline - time.monotonic())))
+    raise HTTPException(status_code=504, detail=f"生图任务超时（已等待 {int(timeout)} 秒），task_id={task_id}")

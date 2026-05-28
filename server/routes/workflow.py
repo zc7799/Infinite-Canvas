@@ -166,7 +166,7 @@ def delete_workflow(name: str):
 
 @router.post("/api/workflows/{name:path}/run")
 def run_workflow(name: str, payload: WorkflowRunRequest):
-    from main import generate  # late import to avoid circular dependency
+    from server.routes.comfyui_generate import generate  # late import to avoid circular dependency
 
     if not WORKFLOW_NAME_RE.match(name):
         raise HTTPException(status_code=400, detail="Invalid workflow name")
