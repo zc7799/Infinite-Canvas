@@ -72,6 +72,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 静态资源缓存控制：HTML/JS/CSS 不缓存，确保修改后立即生效
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+
+class StaticCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path.startswith("/static/") and any(path.endswith(ext) for ext in (".html", ".js", ".css")):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
+app.add_middleware(StaticCacheMiddleware)
+
 GLOBAL_LOOP = None
 
 

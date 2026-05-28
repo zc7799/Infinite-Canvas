@@ -209,6 +209,9 @@ def sync_static_html_versions():
     version = current_app_version()
     if not version:
         return
+    # 追加启动时间戳，确保每次重启版本号都不同，浏览器不会使用旧缓存
+    startup_ts = time.strftime("%H%M%S")
+    version = f"{version}.{startup_ts}"
     safe_version = urllib.parse.quote(version, safe="._-")
     try:
         for name in os.listdir(STATIC_DIR):

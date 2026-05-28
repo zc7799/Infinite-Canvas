@@ -9052,7 +9052,8 @@ function outputDownloadName(url){
     return `canvas-output-${Date.now()}.${ext || 'png'}`;
 }
 function isVideoUrl(url){
-    const clean = (url || '').split('?')[0].toLowerCase();
+    if (typeof url !== 'string') return false;
+    const clean = url.split('?')[0].toLowerCase();
     return /\.(mp4|webm|mov|m4v)$/.test(clean);
 }
 function mediaKindForOutputItem(item){
