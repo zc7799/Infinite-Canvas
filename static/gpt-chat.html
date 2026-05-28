@@ -172,6 +172,7 @@
     </div>
 
     <script>
+(function(){ 'use strict';
         lucide.createIcons();
         function defaultTitle(){ return tr('chat.newConversation'); }
         function setChatTitle(title){
@@ -646,6 +647,22 @@
             await loadConfig();
             await loadConversations();
         };
+
+    window.newConversation = newConversation;
+    window.toggleHistory = toggleHistory;
+    window.autoGrow = autoGrow;
+    window.handleKey = handleKey;
+    window.setMode = setMode;
+    window.setProvider = setProvider;
+    window.setActiveModel = setActiveModel;
+    window.setChatRatio = setChatRatio;
+    window.setChatResolution = setChatResolution;
+    window.sendMessage = sendMessage;
+    window.removeRef = removeRef;
+    window.openConversation = openConversation;
+    window.deleteConversation = deleteConversation;
+
+})();
     </script>
 </body>
 </html>

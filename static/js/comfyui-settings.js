@@ -1,3 +1,6 @@
+(function(){
+'use strict';
+
 function refreshLanguageView(){
     document.title = tr('comfy.title');
     renderList();
@@ -1385,4 +1388,32 @@ document.addEventListener('DOMContentLoaded', () => {
     loadList();
     loadComfyInstances();
 });
+
+// Expose functions called from HTML onclick
+window.addComfyInstance = addComfyInstance;
+window.saveComfyInstances = saveComfyInstances;
+window.onUpload = onUpload;
+window.updateWorkflowTitle = updateWorkflowTitle;
+window.onDelete = onDelete;
+window.onSave = onSave;
+window.setWorkspaceMode = setWorkspaceMode;
+window.graphZoom = graphZoom;
+window.graphFit = graphFit;
+window.closeNodePopup = closeNodePopup;
+window.toggleNodeList = toggleNodeList;
+window.closeImagePreview = closeImagePreview;
+window.removeComfyInstance = removeComfyInstance;
+window.selectWorkflow = selectWorkflow;
+window.openNodePopup = openNodePopup;
+window.toggleField = toggleField;
+window.togglePreviewRandom = togglePreviewRandom;
+window.openImagePreview = openImagePreview;
+window.onRun = onRun;
+window.pickImage = pickImage;
+window.setPreviewValue = setPreviewValue;
+window.addMiniNode = addMiniNode;
+window.pickMiniImage = pickMiniImage;
+window.removeMiniNode = removeMiniNode;
+
+})();
 

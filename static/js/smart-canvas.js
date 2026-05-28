@@ -1,3 +1,6 @@
+(function(){
+'use strict';
+
 const params = new URLSearchParams(location.search);
 const canvasId = params.get('id') || '';
 const shell = document.getElementById('shell');
@@ -9473,3 +9476,24 @@ window.onload = async () => {
     syncApiKindToggleVisibility();
     render();
 };
+
+// Expose functions called from HTML onclick
+window.backToCanvasList = backToCanvasList;
+window.openSmartCanvasShortcuts = openSmartCanvasShortcuts;
+window.openSmartCanvasLog = openSmartCanvasLog;
+window.closeSmartCanvasLog = closeSmartCanvasLog;
+window.closeSmartCanvasShortcuts = closeSmartCanvasShortcuts;
+window.closeImageEditor = closeImageEditor;
+window.undoEditDrawing = undoEditDrawing;
+window.redoEditDrawing = redoEditDrawing;
+window.clearEditDrawing = clearEditDrawing;
+window.setBrushTool = setBrushTool;
+window.toggleGridCustomMode = toggleGridCustomMode;
+window.applyGridPreset = applyGridPreset;
+window.setGridCustomOrientation = setGridCustomOrientation;
+window.undoGridCustomLine = undoGridCustomLine;
+window.clearGridCustomLines = clearGridCustomLines;
+window.navigatePreviewImage = navigatePreviewImage;
+window.downloadPreviewImage = downloadPreviewImage;
+
+})();

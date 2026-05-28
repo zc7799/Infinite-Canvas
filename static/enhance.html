@@ -492,6 +492,7 @@
     </div>
 
     <script>
+(function(){ 'use strict';
         lucide.createIcons();
         function applyLanguage(lang){
             if(lang && window.StudioI18n) StudioI18n.set(lang);
@@ -930,6 +931,16 @@
             loadHistory().then(() => window.HistoryBulkManager?.attach({masonry:'#masonry'}));
             initCompareEvents();
         };
+
+    window.setEnhanceProvider = setEnhanceProvider;
+    window.toggleUpscaleOptions = toggleUpscaleOptions;
+    window.setUpscaleFactor = setUpscaleFactor;
+    window.handleGenerate = handleGenerate;
+    window.zoomImage = zoomImage;
+    window.handleOutsideClick = handleOutsideClick;
+    window.closeLightbox = closeLightbox;
+
+})();
     </script>
 </body>
 

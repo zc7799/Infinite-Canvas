@@ -288,6 +288,7 @@
     </div>
 
     <script>
+(function(){ 'use strict';
         lucide.createIcons();
         function applyLanguage(lang){
             if(lang && window.StudioI18n) StudioI18n.set(lang);
@@ -616,6 +617,15 @@
             closeLightbox();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+    window.switchEngine = switchEngine;
+    window.handleRender = handleRender;
+    window.handleOutsideClick = handleOutsideClick;
+    window.closeLightbox = closeLightbox;
+    window.downloadImage = downloadImage;
+    window.applySameStyle = applySameStyle;
+
+})();
     </script>
 </body>
 

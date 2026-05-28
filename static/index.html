@@ -873,6 +873,7 @@
     </div>
 
     <script>
+(function(){ 'use strict';
         function generateUUID() {
             if (typeof crypto !== 'undefined' && crypto.randomUUID) {
                 try { return crypto.randomUUID(); } catch (e) { }
@@ -1287,6 +1288,15 @@
                 // 离线包里没有网络时保持安静，不影响本地使用。
             }
         }
+
+    window.toggleLocalNav = toggleLocalNav;
+    window.switchUI = switchUI;
+    window.toggleTheme = toggleTheme;
+    window.toggleLanguage = toggleLanguage;
+    window.openProjectPage = openProjectPage;
+    window.runProjectUpdate = runProjectUpdate;
+
+})();
     </script>
 </body>
 

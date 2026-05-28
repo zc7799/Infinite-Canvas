@@ -1,3 +1,6 @@
+(function(){
+'use strict';
+
 let providers = [];
 let selectedId = '';
 const providerList = document.getElementById('providerList');
@@ -2313,3 +2316,51 @@ window.onload = () => {
     if(nameInput) nameInput.addEventListener('input', updateIdPreview);
     if(protocolInput) protocolInput.addEventListener('change', updateProtocolFromInput);
 };
+
+// Expose functions called from HTML onclick
+window.addProvider = addProvider;
+window.openRecommendApi = openRecommendApi;
+window.deleteProvider = deleteProvider;
+window.saveProviders = saveProviders;
+window.saveKeyOnly = saveKeyOnly;
+window.clearKeyOnly = clearKeyOnly;
+window.saveRhKeyOnly = saveRhKeyOnly;
+window.clearRhKeyOnly = clearRhKeyOnly;
+window.testConnection = testConnection;
+window.probeAsync = probeAsync;
+window.createRhEntryFromPaste = createRhEntryFromPaste;
+window.fetchModels = fetchModels;
+window.openModelPicker = openModelPicker;
+window.addModel = addModel;
+window.addMsLora = addMsLora;
+window.closeRecommendApi = closeRecommendApi;
+window.closeModelPicker = closeModelPicker;
+window.renderModelPicker = renderModelPicker;
+window.selectPickerCat = selectPickerCat;
+window.applyModelPicker = applyModelPicker;
+window.fetchRhWorkflowEditor = fetchRhWorkflowEditor;
+window.saveRhWorkflowEditor = saveRhWorkflowEditor;
+window.closeRhWorkflowEditor = closeRhWorkflowEditor;
+window.updateRhWorkflowEditorMeta = updateRhWorkflowEditorMeta;
+window.rhEditorGraphZoom = rhEditorGraphZoom;
+window.rhEditorGraphFit = rhEditorGraphFit;
+window.closeRhNodePopover = closeRhNodePopover;
+window.testRhMappedPreview = testRhMappedPreview;
+window.pickRhPreviewMedia = pickRhPreviewMedia;
+window.toggleRhPreviewRandom = toggleRhPreviewRandom;
+window.toggleRhWorkflowEditorGroup = toggleRhWorkflowEditorGroup;
+window.updateRhWorkflowEditorField = updateRhWorkflowEditorField;
+window.toggleRhWorkflowEditorField = toggleRhWorkflowEditorField;
+window.openRhAppFieldPopover = openRhAppFieldPopover;
+window.openRhWorkflowNodePopover = openRhWorkflowNodePopover;
+window.pickRhThumbnail = pickRhThumbnail;
+window.openRhWorkflowEditor = openRhWorkflowEditor;
+window.openRhAppEditor = openRhAppEditor;
+window.removeRhEntry = removeRhEntry;
+window.applyRecommendedApi = applyRecommendedApi;
+window.selectProvider = selectProvider;
+window.togglePickerRowByIndex = togglePickerRowByIndex;
+window.removeModel = removeModel;
+window.removeMsLora = removeMsLora;
+
+})();

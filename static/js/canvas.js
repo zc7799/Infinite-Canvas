@@ -1,3 +1,6 @@
+(function(){
+'use strict';
+
 function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
 refreshIcons();
 function actionFailed(labelKey, detail=''){
@@ -10767,3 +10770,40 @@ window.onload = async () => {
     await loadCanvasList(false);
     setCanvasMode(false);
 };
+
+// Expose functions called from HTML onclick
+window.toggleQuickToolbar = toggleQuickToolbar;
+window.addImageNode = addImageNode;
+window.addPromptNode = addPromptNode;
+window.addLoopNode = addLoopNode;
+window.addLLMNode = addLLMNode;
+window.addGeneratorNode = addGeneratorNode;
+window.addMsGenNode = addMsGenNode;
+window.addVideoNode = addVideoNode;
+window.addRhNode = addRhNode;
+window.addComfyNode = addComfyNode;
+window.addLTXDirectorNode = addLTXDirectorNode;
+window.addOutputNode = addOutputNode;
+window.groupSelectedImages = groupSelectedImages;
+window.openCanvasLog = openCanvasLog;
+window.menuAdd = menuAdd;
+window.closeOutputLightbox = closeOutputLightbox;
+window.closeCanvasLog = closeCanvasLog;
+window.closeImageEditor = closeImageEditor;
+window.undoEditDrawing = undoEditDrawing;
+window.redoEditDrawing = redoEditDrawing;
+window.clearEditDrawing = clearEditDrawing;
+window.setBrushTool = setBrushTool;
+window.toggleGridCustomMode = toggleGridCustomMode;
+window.applyGridPreset = applyGridPreset;
+window.setGridCustomOrientation = setGridCustomOrientation;
+window.undoGridCustomLine = undoGridCustomLine;
+window.clearGridCustomLines = clearGridCustomLines;
+window.resetImageEditZoom = resetImageEditZoom;
+window.resetCropBox = resetCropBox;
+window.applyImageEdit = applyImageEdit;
+window.closeErrorModal = closeErrorModal;
+window.copyErrorMessage = copyErrorMessage;
+window.deleteNodeFromButton = deleteNodeFromButton;
+
+})();

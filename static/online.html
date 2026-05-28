@@ -214,6 +214,7 @@
     </div>
 
     <script>
+(function(){ 'use strict';
         lucide.createIcons();
         function applyLanguage(lang){
             if(lang && window.StudioI18n) StudioI18n.set(lang);
@@ -606,6 +607,22 @@
         }
         const observer = new IntersectionObserver(entries => { if(entries[0].isIntersecting && currentIndex < allHistory.length) loadHistory(1); }, {threshold:.1});
         window.onload = async () => { applyLanguage(); setRatio('square'); setResolution('1k'); await initModels(); await loadHistory(0); window.HistoryBulkManager?.attach({masonry:'#masonry'}); observer.observe(document.getElementById('loadMoreTrigger')); document.getElementById('loadMoreTrigger').onclick = () => loadHistory(1); };
+
+    window.setProvider = setProvider;
+    window.setModel = setModel;
+    window.setResolution = setResolution;
+    window.setCustomSize = setCustomSize;
+    window.fitCustomSizeToImage = fitCustomSizeToImage;
+    window.setRatio = setRatio;
+    window.setCustomRatio = setCustomRatio;
+    window.submitImage = submitImage;
+    window.zoomImage = zoomImage;
+    window.handleOutsideClick = handleOutsideClick;
+    window.closeLightbox = closeLightbox;
+    window.downloadLightboxImage = downloadLightboxImage;
+    window.applySameStyle = applySameStyle;
+
+})();
     </script>
 </body>
 </html>
