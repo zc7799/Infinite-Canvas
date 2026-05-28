@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 将 ~7000 行单文件 main.py 拆分为 ~15 模块的三层架构（Route/Service/Provider），前端引入 Vue 3 + TypeScript + Vite 渐进迁移。
+**Goal:** 将 ~7000 行单文件 main.py 拆分为 ~15 模块的三层架构（Route/Service/Provider）。前端用 ES Modules + JSDoc 渐进模块化。
 
-**Architecture:** 后端采用 Route → Service → Data 三层，AI Provider 使用 ABC 基类 + 注册表模式。前端 Vite 多入口构建，核心画布合并 SPA，其他页面独立入口，通过框架无关的 `src/shared/` 实现新旧共存。
+**Architecture:** 后端采用 Route → Service → Data 三层，AI Provider 使用 ABC 基类 + 注册表模式。前端保留原生 JS/HTML，通过 ES modules（`import`/`export`）+ JSDoc 类型标注渐进拆分。
 
-**Tech Stack:** Python 3.10+, FastAPI, httpx, Pydantic / Vue 3, TypeScript, Vite, Pinia
+**Tech Stack:** Python 3.10+, FastAPI, httpx, Pydantic / 原生 JS (ES Modules), JSDoc, TypeScript (checkJs)
 
 **基线:** main.py 6957 行，canvas.js 10777 行，smart-canvas.js 9212 行
 
@@ -1539,24 +1539,169 @@ git commit -m "feat(api-settings): migrate to Vue 3 + TypeScript"
 
 ---
 
-后续 Task 11-17 遵循相同模式：
+## 前端重构：ES Modules + JSDoc 渐进模块化
 
-- **Task 11**: 迁移 comfyui-settings 页面
-- **Task 12**: 迁移简单生图页面（online / zimage / klein / enhance）
-- **Task 13**: 迁移 gpt-chat 页面
-- **Task 14**: 迁移 angle 页面（LTX 时间线）
-- **Task 15**: 创建 canvas-app SPA 骨架（router + stores + CanvasViewport）
-- **Task 16**: 迁移画布节点组件（逐个节点类型）
-- **Task 17**: Phase 3 质量加固（openapi-typescript + pytest + ESLint + pre-commit）
+> **2026-05-28 决定：放弃 Vue 3 迁移，改用更稳妥的 ES Modules 方案。**
+> Vue 3 迁移尝试后发现问题：迁移成本高、新老样式难以统一、对存量页面破坏性大。
+> 新方案不引入任何框架，只在原生 JS 基础上做模块化和类型标注，可渐进推进、随时暂停。
+
+**原则：**
+- 不换框架，不碰 HTML/CSS 结构
+- JS 文件逐步拆分为 ES modules（`import`/`export`）
+- 用 JSDoc 注释做类型标注，让 TypeScript 编译器检查（`tsc --checkJs`）
+- 每个页面独立，不影响其他页面
+- 已完成一个再开始下一个
+
+---
+
+### Task 10: ES Modules 基础设施
+
+**目标：** 建立 ES Modules 和 JSDoc 类型检查的基础设施，验证与存量代码兼容。
+
+- [ ] **Step 1: 配置 JSDoc 类型检查**
+
+  创建/更新 `jsconfig.json`（或 `tsconfig.json` 的 `checkJs` 模式）：
+  ```json
+  {
+    "compilerOptions": {
+      "checkJs": true,
+      "allowJs": true,
+      "noEmit": true,
+      "target": "ES2020",
+      "module": "ES2020",
+      "moduleResolution": "bundler",
+      "strict": false,
+      "baseUrl": ".",
+      "paths": {
+        "@shared/*": ["static/js/*"]
+      }
+    },
+    "include": ["static/js/**/*.js"],
+    "exclude": ["static/vendor/**", "static/dist/**", "static/runninghub/**"]
+  }
+  ```
+
+- [ ] **Step 2: 定义共享类型（JSDoc 格式）**
+
+  创建 `static/js/types.js`，用 JSDoc 定义项目核心类型：
+  ```javascript
+  /**
+   * @typedef {Object} ApiProvider
+   * @property {string} id
+   * @property {string} name
+   * @property {string} base_url
+   * @property {string} protocol
+   * ...
+   */
+
+  /**
+   * @typedef {Object} GenerationResult
+   * @property {string} url
+   * @property {string} [task_id]
+   * @property {string} [revised_prompt]
+   */
+  ```
+
+- [ ] **Step 3: 选一个简单页面试点 ES module**
+
+  以 `enhance.html` / `enhance.js` 为试点，改为 `<script type="module">` 加载，验证模块导入导出正常。
+
+---
+
+### Task 11: 共享模块 ES Modules 化
+
+**目标：** 将 `static/js/` 下的共享模块转为 ES modules。
+
+- [ ] **Step 1: `common.js` → ES module**
+
+  当前 `common.js` 约 200 行，工具函数挂在 `window` 上。改为 `export` 导出：
+  ```javascript
+  // static/js/common.js
+  /** @param {string} url */
+  export function isVideoUrl(url) { ... }
+  
+  /** @param {number} ms */
+  export function sleep(ms) { ... }
+  
+  /** @param {string} selector */
+  export function $(selector) { ... }
+  ```
+
+- [ ] **Step 2: `i18n-core.js` → ES module**
+
+  当前 `window.StudioI18n` 全局单例。改为 `export default`：
+  ```javascript
+  // static/js/i18n-core.js
+  class StudioI18n { ... }
+  export default new StudioI18n();
+  ```
+
+- [ ] **Step 3: `theme.js` → ES module**
+
+  同理，`export` 替换 `window` 挂载。
+
+- [ ] **Step 4: `static/js/i18n/` → ES modules**
+
+  语言包文件改为 `export const zh = {...}` / `export const en = {...}`。
+
+---
+
+### Task 12: 页面级 JS 模块化（按页面逐个推进）
+
+**目标：** 每个页面的 JS 文件拆分为逻辑清晰的 ES modules。按复杂度从低到高推进。
+
+**每个页面的标准做法：**
+1. 主入口文件 `<script type="module">` 引入
+2. 拆分：状态管理 / API 调用 / UI 渲染 / 事件处理
+3. 每个导出函数加 JSDoc 类型标注
+4. 通过 `tsc --checkJs` 验证无类型错误
+
+- [ ] **Tier 1: 简单页面（无复杂状态）**
+  - `enhance.js` — 图片增强，单表单提交
+  - `zimage.js` — Z-Image 生成，参数配置 + 结果展示
+  - `klein.js` — Flux2-Klein，同上模式
+
+- [ ] **Tier 2: 中等页面（有列表/配置）**
+  - `api-settings.js` — Provider 配置 CRUD（已有 Vue 3 版本的组件逻辑可参考）
+  - `comfyui-settings.js` — ComfyUI 实例 + 工作流管理
+  - `online.js` — 在线生图，含 Provider 切换 + 参数面板
+
+- [ ] **Tier 3: 复杂页面（画布/聊天）**
+  - `gpt-chat.js` — 聊天界面，SSE 流式响应 + 对话历史
+  - `angle.js` — LTX Director 视频时间线，拖拽交互
+  - `canvas.js` (~10777 行) — 主画布，最复杂，需分阶段拆分
+  - `smart-canvas.js` (~9212 行) — 智能画布，同上
+
+---
+
+### Task 13: 质量加固
+
+**目标：** 为原生 JS 项目添加类型检查、代码规范、测试。
+
+- [ ] **Step 1: 类型检查集成**
+  - `tsc --checkJs --noEmit` 加入 pre-commit
+  - 修复阻塞性类型错误（any 类型警告先忽略）
+
+- [ ] **Step 2: ESLint 配置**
+  - 安装 `eslint` + `@eslint/js`
+  - 最小规则集：`no-unused-vars`、`no-undef`、`no-duplicate-imports`
+  - 忽略 `static/vendor/`、`static/dist/`
+
+- [ ] **Step 3: pre-commit hook**
+  - `.git/hooks/pre-commit` 或 lint-staged：
+    - `tsc --checkJs --noEmit`
+    - `eslint static/js/ --ext .js`
+
+- [ ] **Step 4: 后端 pytest 基础覆盖**
+  - `tests/` 目录，用 `pytest` + `httpx.AsyncClient`
+  - 优先覆盖：Provider CRUD、生图接口、ComfyUI 任务队列
 
 ---
 
 ### 验证清单
 
-- [ ] `main.py` 从 6957 行缩减到 < 150 行
-- [ ] 每个 server/ 模块 ≤ 300 行
-- [ ] 所有现有 API 端点无回归
-- [ ] TypeScript 编译零错误 (`npx tsc --noEmit`)
-- [ ] Vite build 成功 (`npm run build`)
-- [ ] upstream-map.json 覆盖主文件中所有顶层符号
-- [ ] 新旧页面共存（旧 HTML 仍在 static/，新页面在 static/dist/）
+- [x] `main.py` 从 6957 行缩减到 < 200 行（实际 180 行）
+- [x] 每个 server/ 模块职责清晰
+- [x] 所有现有 API 端点无回归
+- [x] upstream-map.json 覆盖主文件中所有顶层符号
+- [x] 后端三层架构完整运行

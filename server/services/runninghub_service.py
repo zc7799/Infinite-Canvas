@@ -7,6 +7,7 @@ import os
 import re
 import time
 import urllib.parse
+import uuid
 from threading import Lock
 from typing import Any, Dict, List, Optional
 
@@ -14,12 +15,12 @@ import httpx
 from fastapi import HTTPException
 
 from server.config import (
-    COMFYUI_ADDRESS, DATA_DIR, OUTPUT_DIR, RUNNINGHUB_DEFAULT_APPS,
-    RUNNINGHUB_DEFAULT_BASE_URL, RUNNINGHUB_DEFAULT_IMAGE_MODELS,
-    RUNNINGHUB_DEFAULT_WORKFLOWS, RUNNINGHUB_THUMBNAIL_EXTS,
-    RUNNINGHUB_WORKFLOW_STORE_FILE, STATIC_RUNNINGHUB_API_PROVIDERS_FILE,
-    STATIC_RUNNINGHUB_DIR, STATIC_RUNNINGHUB_THUMBNAIL_DIR,
-    STATIC_DIR, GLOBAL_CONFIG_LOCK,
+    COMFYUI_ADDRESS, DATA_DIR, OUTPUT_DIR, OUTPUT_INPUT_DIR, OUTPUT_OUTPUT_DIR,
+    RUNNINGHUB_DEFAULT_APPS, RUNNINGHUB_DEFAULT_BASE_URL,
+    RUNNINGHUB_DEFAULT_IMAGE_MODELS, RUNNINGHUB_DEFAULT_WORKFLOWS,
+    RUNNINGHUB_THUMBNAIL_EXTS, RUNNINGHUB_WORKFLOW_STORE_FILE,
+    STATIC_RUNNINGHUB_API_PROVIDERS_FILE, STATIC_RUNNINGHUB_DIR,
+    STATIC_RUNNINGHUB_THUMBNAIL_DIR, STATIC_DIR, GLOBAL_CONFIG_LOCK,
 )
 from server.providers.apimart import parse_size_pair
 from server.services.media_service import (
@@ -27,15 +28,17 @@ from server.services.media_service import (
     output_path_for, output_url_for, sanitize_asset_name,
 )
 from server.services.provider_service import (
-    bearer_auth_value, load_api_providers, load_runninghub_workflow_store,
+    bearer_auth_value, get_api_provider_exact, load_api_providers,
+    load_runninghub_workflow_store, load_static_runninghub_provider,
     merge_runninghub_provider_with_static, normalize_endpoint_override,
-    normalize_runninghub_entries, normalize_runninghub_entry,
+    normalize_provider, normalize_runninghub_entries, normalize_runninghub_entry,
     preserve_runninghub_hidden_overrides, provider_key_env,
     runninghub_endpoint_url, runninghub_normalize_field,
     runninghub_provider_with_workflow_store, runninghub_select_workflow_config,
-    runninghub_workflow_config_has_payload, runninghub_workflow_entry_from_config,
-    runninghub_workflow_store_key, save_api_providers,
-    static_runninghub_thumbnail_url, apply_runninghub_system_thumbnails,
+    runninghub_wallet_key_env, runninghub_workflow_config_has_payload,
+    runninghub_workflow_entry_from_config, runninghub_workflow_store_key,
+    save_api_providers, static_runninghub_thumbnail_url,
+    apply_runninghub_system_thumbnails,
 )
 
 RUNNINGHUB_WORKFLOW_LOCK = Lock()

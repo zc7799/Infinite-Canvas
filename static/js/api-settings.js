@@ -2362,5 +2362,6 @@ window.selectProvider = selectProvider;
 window.togglePickerRowByIndex = togglePickerRowByIndex;
 window.removeModel = removeModel;
 window.removeMsLora = removeMsLora;
+window.fallbackRhEntryThumbnail = fallbackRhEntryThumbnail;
 
 })();

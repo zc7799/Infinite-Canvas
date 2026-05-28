@@ -199,13 +199,7 @@ const LTX_DIRECTOR_WF_NODE = '46';
 const LTX_DIRECTOR_SEED_NODE = '94:28';
 const LTX_SEGMENT_COLORS = ['#e07b3a', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b'];
 const CANVAS_EMOJIS = ['layers','sparkles','image','palette','wand-2','star','heart','rocket','flame','moon','cloud','leaf','gem','compass','pin','flag','bookmark','crown'];
-function renderCanvasIcon(icon, size = 14) {
-    // 旧的默认 emoji 或空值都映射为 layers
-    if(!icon || icon === '🧩') return `<i data-lucide="layers" style="width:${size}px;height:${size}px"></i>`;
-    // 含非 ASCII 字符（用户旧选过的 emoji）继续按文本渲染
-    if(/[^\x00-\x7F]/.test(icon)) return escapeHtml(icon);
-    return `<i data-lucide="${escapeHtml(icon)}" style="width:${size}px;height:${size}px"></i>`;
-}
+// renderCanvasIcon → utils.js
 
 const SIZE_MAP = {
     square: { '1k':'1024x1024', '2k':'2048x2048', '4k':'2048x2048' },
@@ -243,7 +237,7 @@ const DEFAULT_VIDEO_MODELS = [
     'doubao-seedance-1-0-lite-i2v-250428'
 ];
 
-function uid(prefix='n'){ return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now()}`; }
+// uid → utils.js
 function applyTheme(theme){
     const dark = theme === 'dark';
     document.documentElement.classList.toggle('studio-theme-dark', dark);
@@ -290,149 +284,37 @@ function loadLocalModelLists(){
         hasManagedChatModels = false;
     }
 }
-function uniqueModels(list){
-    const seen = new Set();
-    return list.map(item => String(item || '').trim()).filter(item => {
-        if(!item || seen.has(item)) return false;
-        seen.add(item);
-        return true;
-    });
-}
+// uniqueModels, normalizeProviderId → utils.js
+// defaultApiProviders 保留（引用 IIFE 局部变量 imageModels/chatModels）
 function defaultApiProviders(){
     return [{id:'comfly', name:'Comfly', base_url:'', enabled:true, image_models:imageModels, chat_models:chatModels, video_models:videoModels.length ? videoModels : DEFAULT_VIDEO_MODELS, has_key:false, key_preview:''}];
 }
-function isRunningHubProvider(provider){
-    const id = String(provider?.id || '').trim().toLowerCase();
-    const protocol = String(provider?.protocol || '').trim().toLowerCase();
-    const name = String(provider?.name || '').trim().toLowerCase();
-    return id === 'runninghub' || protocol === 'runninghub' || name === 'runninghub' || id === 'rh';
-}
-function normalizeProviderId(value){
-    return String(value || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-').slice(0, 40);
-}
-function imageApiProviders(){
-    const providers = (apiProviders.length ? apiProviders : defaultApiProviders())
-        .filter(p => p.id !== 'modelscope' && !isRunningHubProvider(p) && p.enabled !== false && (p.image_models || []).length);
-    return providers;
-}
-function providerById(id){
-    return (apiProviders.length ? apiProviders : defaultApiProviders()).find(p => p.id === id) || imageApiProviders()[0] || defaultApiProviders()[0];
-}
-function resolveProviderId(id){
-    return providerById(id)?.id || 'comfly';
-}
-function chatApiProviders(){
-    const providers = (apiProviders.length ? apiProviders : defaultApiProviders())
-        .filter(p => p.enabled !== false && (p.chat_models || []).length);
-    return providers.length ? providers : defaultApiProviders();
-}
-function resolveChatProviderId(id){
-    const providers = chatApiProviders();
-    return providers.find(p => p.id === id)?.id || providers[0]?.id || 'comfly';
-}
-function chatProviderOptions(selectedId){
-    const selected = resolveChatProviderId(selectedId);
-    return chatApiProviders().map(provider => `<option value="${escapeHtml(provider.id)}" ${provider.id === selected ? 'selected' : ''}>${escapeHtml(provider.name || provider.id)}</option>`).join('');
-}
-function providerChatModels(providerId){
-    const provider = apiProviders.find(p => p.id === providerId);
-    return uniqueModels(provider?.chat_models || []);
-}
-function resolveImageProviderId(id){
-    const providers = imageApiProviders();
-    return providers.find(p => p.id === id)?.id || providers[0]?.id || '';
-}
-function providerOptions(selectedId){
-    const selected = resolveImageProviderId(selectedId);
-    const providers = imageApiProviders();
-    if(!providers.length) return `<option value="" disabled selected>${tr('canvas.noApiProviders') || '暂无 API 平台'}</option>`;
-    return providers.map(provider => `<option value="${escapeHtml(provider.id)}" ${provider.id === selected ? 'selected' : ''}>${escapeHtml(provider.name || provider.id)}</option>`).join('');
-}
-function providerImageModels(providerId){
-    // 不走 providerById（会 fallback 到第一个 provider，造成串台），直接查精确匹配
-    const provider = apiProviders.find(p => p.id === providerId);
-    return uniqueModels(provider?.image_models || []);
-}
-function videoApiProviders(){
-    const providers = (apiProviders.length ? apiProviders : defaultApiProviders())
-        .filter(p => p.id !== 'modelscope' && !isRunningHubProvider(p) && p.enabled !== false);
-    return providers.length ? providers : defaultApiProviders();
-}
-function resolveVideoProviderId(id){
-    const providers = videoApiProviders();
-    return providers.find(p => p.id === id)?.id || providers[0]?.id || 'comfly';
-}
-function videoProviderOptions(selectedId){
-    const selected = resolveVideoProviderId(selectedId);
-    return videoApiProviders().map(provider => `<option value="${escapeHtml(provider.id)}" ${provider.id === selected ? 'selected' : ''}>${escapeHtml(provider.name || provider.id)}</option>`).join('');
-}
-function providerVideoModels(providerId){
-    // 不走 providerById（会 fallback 到第一个 provider，造成串台），直接查精确匹配
-    const provider = apiProviders.find(p => p.id === providerId);
-    return uniqueModels(provider?.video_models || []);
-}
-function videoModelOptions(selectedModel, providerId){
-    const models = providerVideoModels(providerId);
-    if(!models.length){
-        return `<option value="" disabled selected>${tr('canvas.noModelsHint') || '暂无模型，请到 API 设置添加'}</option>`;
-    }
-    const selected = selectedModel || models[0];
-    return uniqueModels([selected, ...models]).filter(Boolean).map(model => `<option value="${escapeHtml(model)}" ${model === selected ? 'selected' : ''}>${escapeHtml(model)}</option>`).join('');
-}
-function allImageModels(providerId){
-    const providerModels = providerImageModels(providerId || managedProviderId);
-    return uniqueModels(providerModels);
-}
-function modelscopeImageModels(selected = ''){
-    const provider = (apiProviders.length ? apiProviders : []).find(p => p.id === 'modelscope');
-    return uniqueModels([
-        selected,
-        ...((provider?.image_models || []).length ? provider.image_models : []),
-        'Tongyi-MAI/Z-Image-Turbo',
-        'black-forest-labs/FLUX.2-klein-9B'
-    ]);
-}
-function modelscopeImageModelOptions(selectedModel){
-    const selectedValue = selectedModel || modelscopeImageModels()[0] || 'Tongyi-MAI/Z-Image-Turbo';
-    return modelscopeImageModels(selectedValue).map(model => `<option value="${escapeHtml(model)}" ${model === selectedValue ? 'selected' : ''}>${escapeHtml(model)}</option>`).join('');
-}
-function currentMsModelId(modelKey, node){
-    if(modelKey === 'custom') return node.msCustomModel || modelscopeImageModels()[0] || 'Tongyi-MAI/Z-Image-Turbo';
-    return (MS_GEN_MODELS[modelKey] || MS_GEN_MODELS.zimage).modelId;
-}
-function modelscopeLorasForModel(modelId){
-    const provider = (apiProviders.length ? apiProviders : []).find(p => p.id === 'modelscope');
-    const list = Array.isArray(provider?.ms_loras) ? provider.ms_loras : [];
-    return list.filter(lora =>
-        lora && lora.enabled !== false &&
-        String(lora.id || '').trim() &&
-        String(lora.target_model || lora.model || '').trim() === String(modelId || '').trim()
-    );
-}
-function modelscopeLoraOptions(loras, selectedId){
-    return loras.map(lora => {
-        const id = String(lora.id || '').trim();
-        const label = String(lora.name || id).trim();
-        return `<option value="${escapeHtml(id)}" ${id === selectedId ? 'selected' : ''}>${escapeHtml(label)}</option>`;
-    }).join('');
-}
-function allChatModels(){
-    const providerModels = chatApiProviders().flatMap(p => p.chat_models || []);
-    return uniqueModels(hasManagedChatModels ? localChatModels : [...providerModels, ...chatModels, ...localChatModels]);
-}
-function resolveImageModel(value){
-    if(value === 'gpt') return models.gpt;
-    if(value === 'nano') return models.nano;
-    return value || allImageModels(managedProviderId)[0] || models.gpt;
-}
-function normalizedImageQuality(value){
-    const quality = String(value || 'auto').trim().toLowerCase();
-    return ['low','medium','high'].includes(quality) ? quality : '';
-}
-function resolveChatModel(value, providerId=''){
-    const providerModels = providerId ? providerChatModels(providerId) : [];
-    return value || providerModels[0] || allChatModels()[0] || chatModels[0] || 'gpt-4o-mini';
-}
+// isRunningHubProvider → providers.js
+// imageApiProviders → providers.js
+// providerById → providers.js
+// resolveProviderId → providers.js
+// chatApiProviders → providers.js
+// resolveChatProviderId → providers.js
+// chatProviderOptions → providers.js
+// providerChatModels → providers.js
+// resolveImageProviderId → providers.js
+// providerOptions → providers.js
+// providerImageModels → providers.js
+// videoApiProviders → providers.js
+// resolveVideoProviderId → providers.js
+// videoProviderOptions → providers.js
+// providerVideoModels → providers.js
+// videoModelOptions → providers.js
+// allImageModels → providers.js
+// modelscopeImageModels → providers.js
+// modelscopeImageModelOptions → providers.js
+// currentMsModelId → providers.js
+// modelscopeLorasForModel → providers.js
+// modelscopeLoraOptions → providers.js
+// allChatModels → providers.js
+// resolveImageModel → providers.js
+// resolveChatModel → providers.js
+// normalizedImageQuality, apiErrorMessage → utils.js
 function showErrorModal(message, title=tr('canvas.generationFailed')){
     if(!errorModal || !errorMessage){
         alert(message || title);
@@ -442,29 +324,6 @@ function showErrorModal(message, title=tr('canvas.generationFailed')){
     errorMessage.textContent = message || title;
     errorModal.classList.add('open');
     refreshIcons();
-}
-function apiErrorMessage(data, fallback='请求失败'){
-    if(!data) return fallback;
-    if(typeof data === 'string') return data || fallback;
-    const detail = data.detail ?? data.error ?? data.message;
-    if(typeof detail === 'string') return detail || fallback;
-    if(Array.isArray(detail)){
-        const messages = detail.map(item => {
-            if(typeof item === 'string') return item;
-            const loc = Array.isArray(item?.loc) ? item.loc.filter(x => x !== 'body').join('.') : '';
-            const msg = item?.msg || item?.message || JSON.stringify(item);
-            return loc ? `${loc}: ${msg}` : msg;
-        }).filter(Boolean);
-        return messages.join('\n') || fallback;
-    }
-    if(detail && typeof detail === 'object'){
-        return detail.message || detail.msg || JSON.stringify(detail);
-    }
-    try {
-        return JSON.stringify(data);
-    } catch(e) {
-        return fallback;
-    }
 }
 async function responseErrorMessage(response, fallback='请求失败'){
     try {
@@ -521,44 +380,7 @@ async function copyTextToClipboard(text){
         return false;
     }
 }
-function parseRatioValue(value){
-    const raw = String(value || '').trim();
-    if(!raw) return null;
-    if(raw.includes(':')){
-        const [w,h] = raw.split(':').map(Number);
-        if(w > 0 && h > 0) return w / h;
-    }
-    const n = Number(raw);
-    return n > 0 ? n : null;
-}
-function parseSizeValue(value){
-    const match = String(value || '').trim().match(/^(\d+)\s*[xX*]\s*(\d+)$/);
-    return match ? {width:match[1], height:match[2]} : null;
-}
-function gcdInt(a, b){
-    a = Math.abs(Math.round(Number(a) || 0));
-    b = Math.abs(Math.round(Number(b) || 0));
-    while(b){ const t = b; b = a % b; a = t; }
-    return a || 1;
-}
-function ratioPartsFromDimensions(width, height){
-    const w = Math.max(1, Math.round(Number(width) || 1));
-    const h = Math.max(1, Math.round(Number(height) || 1));
-    const target = w / h;
-    let best = {width:1, height:1, score:Infinity};
-    const maxPart = 21;
-    for(let rw = 1; rw <= maxPart; rw++){
-        for(let rh = 1; rh <= maxPart; rh++){
-            const ratio = rw / rh;
-            const relativeError = Math.abs(ratio - target) / target;
-            const complexityPenalty = Math.max(rw, rh) * 0.0008;
-            const score = relativeError + complexityPenalty;
-            if(score < best.score) best = {width:rw, height:rh, score};
-        }
-    }
-    const g = gcdInt(best.width, best.height);
-    return {width:best.width / g, height:best.height / g};
-}
+// parseRatioValue, parseSizeValue, gcdInt, ratioPartsFromDimensions → utils.js
 function apiImageSize(ratioValue, resolutionValue, customRatioValue = '', customSizeValue = ''){
     if(resolutionValue === 'custom') return String(customSizeValue || '').trim();
     const resolutionKey = resolutionValue || '1k';
@@ -577,10 +399,7 @@ function apiImageSize(ratioValue, resolutionValue, customRatioValue = '', custom
     const ratioKey = ratioValue && SIZE_MAP[ratioValue] ? ratioValue : 'square';
     return SIZE_MAP[ratioKey]?.[resolutionKey] || SIZE_MAP.square[resolutionKey] || SIZE_MAP.square['1k'];
 }
-function parseSizePair(value){
-    const match = String(value || '').match(/(\d+)\s*x\s*(\d+)/i);
-    return match ? {width:Number(match[1]), height:Number(match[2])} : null;
-}
+// parseSizePair → utils.js
 function nearestFourKSizeFor(width, height){
     const w = Math.max(1, Number(width) || 1);
     const h = Math.max(1, Number(height) || 1);
@@ -624,37 +443,9 @@ function normalizeApiNodeLayout(node){
     if(!node || node.type !== 'generator') return;
     if(Number(node.w || 0) === 418) node.w = 380;
 }
-function imageModelOptions(selectedModel, providerId){
-    if(!imageApiProviders().length){
-        return `<option value="" disabled selected>${tr('canvas.noApiProvidersHint') || '暂无 API 平台，请到 API 设置添加'}</option>`;
-    }
-    const models = allImageModels(providerId);
-    if(!models.length){
-        return `<option value="" disabled selected>${tr('canvas.noImageModelsHint') || '暂无生图模型，请到 API 设置添加'}</option>`;
-    }
-    const selectedValue = resolveImageModel(selectedModel);
-    const options = models.map(model => `<option value="${escapeHtml(model)}" ${model === selectedValue ? 'selected' : ''}>${escapeHtml(model)}</option>`).join('');
-    const hasSelected = models.includes(selectedValue);
-    return `${hasSelected || !selectedValue ? '' : `<option value="${escapeHtml(selectedValue)}" selected>${escapeHtml(selectedValue)}</option>`}${options}`;
-}
-function chatModelOptions(selectedModel, providerId=''){
-    const models = providerId ? providerChatModels(providerId) : allChatModels();
-    if(!models.length){
-        return `<option value="" disabled selected>${tr('canvas.noModelsHint') || '暂无模型，请到 API 设置添加'}</option>`;
-    }
-    const selectedValue = resolveChatModel(selectedModel, providerId);
-    const options = models.map(model => `<option value="${escapeHtml(model)}" ${model === selectedValue ? 'selected' : ''}>${escapeHtml(model)}</option>`).join('');
-    const hasSelected = models.includes(selectedValue);
-    return `${hasSelected || !selectedValue ? '' : `<option value="${escapeHtml(selectedValue)}" selected>${escapeHtml(selectedValue)}</option>`}${options}`;
-}
-function formatCanvasTime(value){
-    if(!value) return '--';
-    const raw = Number(value);
-    const time = raw < 10000000000 ? raw * 1000 : raw;
-    const date = new Date(time);
-    if(Number.isNaN(date.getTime())) return '--';
-    return date.toLocaleString(window.StudioI18n?.lang() === 'en' ? 'en-US' : 'zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
-}
+// imageModelOptions → providers.js
+// chatModelOptions → providers.js
+// formatCanvasTime → utils.js
 function setStatus(text){
     document.getElementById('saveState').textContent = text;
     if(gateStatus) gateStatus.textContent = text;
@@ -948,6 +739,24 @@ async function loadConfig(){
     } catch(e) {
         apiProviders = defaultApiProviders();
     }
+    syncCanvasState();
+}
+function syncCanvasState(){
+    window.CanvasState = window.CanvasState || {};
+    var s = window.CanvasState;
+    s.apiProviders = apiProviders;
+    s.imageModels = imageModels;
+    s.chatModels = chatModels;
+    s.videoModels = videoModels;
+    s.msChatModels = msChatModels;
+    s.managedProviderId = managedProviderId;
+    s.localImageModels = localImageModels;
+    s.localChatModels = localChatModels;
+    s.hasManagedImageModels = hasManagedImageModels;
+    s.hasManagedChatModels = hasManagedChatModels;
+    s.models = models;
+    s.nodes = nodes;
+    s.runningHubWorkflowCache = runningHubWorkflowCache;
 }
 
 // 监听 API 设置页面的变更广播，实时刷新画布的模型/平台下拉
@@ -961,16 +770,7 @@ try {
         }
     };
 } catch(e) { /* 不支持 BroadcastChannel 的旧浏览器忽略 */ }
-function msChatModelOptions(selected){
-    // 单一数据源：从 API 设置里 modelscope 平台的 chat_models 取
-    const msProvider = apiProviders.find(p => p.id === 'modelscope');
-    const list = uniqueModels(msProvider?.chat_models || []);
-    if(!list.length){
-        return `<option value="" disabled selected>${tr('canvas.noModelsHint') || '暂无模型，请到 API 设置添加'}</option>`;
-    }
-    const sel = selected && list.includes(selected) ? selected : list[0];
-    return list.map(m => `<option value="${escapeHtml(m)}" ${m === sel ? 'selected' : ''}>${escapeHtml(m.split('/').pop().split(':')[0])}</option>`).join('');
-}
+// msChatModelOptions → providers.js
 async function loadCanvasList(openFirst=true){
     try {
         const res = await fetch('/api/canvases');
@@ -1758,6 +1558,7 @@ function addVideoNode(point){
         running:false
     });
 }
+// addRhNode 保留（引用 IIFE 局部变量 addNode/defaultPoint）
 function addRhNode(point){
     const p = point || defaultPoint(180, 0);
     return addNode({
@@ -2648,19 +2449,7 @@ function menuAdd(type){
     if(type === 'ltxDirector') addLTXDirectorNode(menuPoint);
     if(type === 'output') addOutputNode(menuPoint);
 }
-function mediaKindForUpload(file){
-    const type = String(file?.type || '').toLowerCase();
-    const name = String(file?.name || '').toLowerCase();
-    if(type.startsWith('video/') || /\.(mp4|webm|mov|m4v|avi|mkv)(\?|$)/.test(name)) return 'video';
-    if(type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)(\?|$)/.test(name)) return 'audio';
-    return 'image';
-}
-function isSupportedUploadFile(file){
-    const type = String(file?.type || '').toLowerCase();
-    const name = String(file?.name || '').toLowerCase();
-    return type.startsWith('image/') || type.startsWith('video/') || type.startsWith('audio/')
-        || /\.(png|jpe?g|webp|gif|bmp|avif|mp4|webm|mov|m4v|avi|mkv|mp3|wav|m4a|aac|ogg|flac)(\?|$)/.test(name);
-}
+// mediaKindForUpload, isSupportedUploadFile → utils.js
 function dataTransferItemEntry(item){
     try { return item?.webkitGetAsEntry?.() || null; } catch { return null; }
 }
@@ -2688,30 +2477,7 @@ async function uploadFilesFromDataTransfer(dataTransfer){
         : [...(dataTransfer?.files || [])];
     return raw.filter(isSupportedUploadFile);
 }
-function isAudioUrl(url){
-    return /\.(mp3|wav|m4a|aac|ogg|flac)(\?|$)/i.test(String(url || ''));
-}
-function isTextUrl(url){
-    return /\.(txt|json|csv|srt|vtt|md)(\?|$)/i.test(String(url || ''));
-}
-function mediaKindForRef(ref){
-    const kind = String(ref?.kind || ref?.mediaKind || '').toLowerCase();
-    if(['video','audio','image','text','file'].includes(kind)) return kind;
-    const url = String(ref?.url || ref || '');
-    if(isVideoUrl(url)) return 'video';
-    if(isAudioUrl(url)) return 'audio';
-    if(isTextUrl(url)) return 'text';
-    return 'image';
-}
-function imageRefsOnly(refs){
-    return (refs || []).filter(ref => ref?.url && mediaKindForRef(ref) === 'image');
-}
-function videoRefsOnly(refs){
-    return (refs || []).filter(ref => ref?.url && mediaKindForRef(ref) === 'video');
-}
-function isRemoteVideoReferenceUrl(url){
-    return /^https?:\/\//i.test(String(url || '')) || /^asset:\/\//i.test(String(url || ''));
-}
+// isAudioUrl, isTextUrl, mediaKindForRef, imageRefsOnly, videoRefsOnly, isRemoteVideoReferenceUrl → utils.js
 function tempShUploadedUrlForNode(node, url){
     const match = (node?.tempShLinks || []).find(item => item?.source === url && item?.url);
     return match?.url || url;
@@ -2854,9 +2620,7 @@ async function setCanvasManualVideoUrl(nodeId){
     showErrorModal('已设置视频网址。', '输入网址');
     return url;
 }
-function audioRefsOnly(refs){
-    return (refs || []).filter(ref => ref?.url && mediaKindForRef(ref) === 'audio');
-}
+// audioRefsOnly → utils.js
 function mediaKindForNode(node){
     if(node?.mediaKind) return node.mediaKind;
     if(isVideoUrl(node?.url)) return 'video';
@@ -6040,26 +5804,9 @@ async function ensureComfyWorkflow(name){
     comfyWorkflowCache[name] = data;
     return data;
 }
-function validRunningHubWorkflowId(workflowId){
-    return String(workflowId || '').trim();
-}
-function currentRunningHubWorkflow(node){
-    const workflowId = validRunningHubWorkflowId(node.workflowId || '');
-    return runningHubWorkflowCache[workflowId] || null;
-}
-async function ensureRunningHubWorkflow(workflowId){
-    workflowId = validRunningHubWorkflowId(workflowId);
-    if(!workflowId) return null;
-    if(runningHubWorkflowCache[workflowId]) return runningHubWorkflowCache[workflowId];
-    const res = await fetch(`/api/runninghub/workflows/${encodeURIComponent(workflowId)}`);
-    if(!res.ok){
-        delete runningHubWorkflowCache[workflowId];
-        return null;
-    }
-    const data = await res.json();
-    runningHubWorkflowCache[workflowId] = data.workflow || null;
-    return runningHubWorkflowCache[workflowId];
-}
+// validRunningHubWorkflowId → engine-runninghub.js
+// currentRunningHubWorkflow → engine-runninghub.js
+// ensureRunningHubWorkflow → engine-runninghub.js
 function comfyFieldKind(f){
     if(['image','video','audio'].includes(f?.type)) return f.type;
     const key = `${f.input || ''} ${f.name || ''}`.toLowerCase();
@@ -6206,823 +5953,7 @@ function renderComfyImages(list, node, imageInputs){
         list.appendChild(item);
     });
 }
-const RH_KNOWN_FIELD_OPTIONS = {
-    aspectRatio:['1:1','16:9','9:16','4:3','3:4','4:5','5:4','3:2','2:3','21:9','9:21'],
-    aspect_ratio:['1:1','16:9','9:16','4:3','3:4','4:5','5:4','3:2','2:3','21:9','9:21'],
-    ratio:['1:1','16:9','9:16','4:3','3:4','4:5','5:4','3:2','2:3'],
-    resolution:['1k','2k','4k','8k'],
-    size:['512','768','1024','1280','1536','2048'],
-    mode:['text2img','img2img'],
-    quality:['low','medium','high','best'],
-    instanceType:['default','plus','pro'],
-    instance_type:['default','plus','pro'],
-    precision:['fp16','fp32','bf16'],
-    scheduler:['normal','karras','exponential','sgm_uniform','simple','ddim_uniform'],
-    sampler:['euler','euler_ancestral','heun','dpm_2','dpm_2_ancestral','lms','dpmpp_2m','dpmpp_sde','ddim','uni_pc']
-};
-function rhParamKey(nodeId, fieldName){
-    return `${nodeId ?? ''}::${fieldName ?? ''}`;
-}
-function rhFieldKind(field){
-    const type = String(field?.fieldType || '').trim().toUpperCase();
-    if(type === 'IMAGE') return 'image';
-    if(type === 'VIDEO') return 'video';
-    if(type === 'AUDIO') return 'audio';
-    if(['NUMBER','FLOAT','INTEGER','INT'].includes(type)) return 'number';
-    if(['BOOLEAN','BOOL'].includes(type)) return 'boolean';
-    const key = `${field?.fieldName || ''} ${field?.fieldValue || ''}`.toLowerCase();
-    if(/\b(image|img|mask|photo|picture)\b/.test(key) || /\.(png|jpe?g|webp|gif|bmp)(\?|$)/i.test(key)) return 'image';
-    if(/\b(video|movie|mp4)\b/.test(key) || /\.(mp4|webm|mov|m4v|mkv)(\?|$)/i.test(key)) return 'video';
-    if(/\b(audio|sound|music|voice)\b/.test(key) || /\.(mp3|wav|ogg|m4a|flac|aac)(\?|$)/i.test(key)) return 'audio';
-    return 'text';
-}
-function rhFieldRole(field){
-    const kind = rhFieldKind(field);
-    if(['image','video','audio','number','boolean'].includes(kind)) return kind;
-    const text = `${field?.fieldName || ''} ${field?.label || ''} ${field?.group || ''}`.toLowerCase();
-    if(/prompt|positive|negative|text|caption|description|关键词|提示词|正向|负向/.test(text)) return 'prompt';
-    return 'text';
-}
-function rhExtractFieldOptions(field){
-    const candidates = [field?.fieldData, field?.options, field?.list, field?.values, field?.enum, field?.choices, field?.items, field?.selectOptions, field?.dropdown];
-    for(const candidate of candidates){
-        if(!Array.isArray(candidate) || !candidate.length) continue;
-        if(candidate.every(x => ['string','number'].includes(typeof x))) return candidate.map(String);
-        if(candidate.every(x => x && typeof x === 'object' && ('value' in x || 'label' in x || 'name' in x))){
-            return candidate.map(x => x.value ?? x.label ?? x.name).filter(v => v !== undefined && v !== null).map(String);
-        }
-    }
-    const fieldType = String(field?.fieldType || '').toUpperCase();
-    if(['LIST','SELECT','DROPDOWN','COMBO','ENUM'].includes(fieldType) && Array.isArray(field?.fieldValue)){
-        return field.fieldValue.filter(x => ['string','number'].includes(typeof x)).map(String);
-    }
-    const name = String(field?.fieldName || '').trim();
-    if(name){
-        if(RH_KNOWN_FIELD_OPTIONS[name]) return RH_KNOWN_FIELD_OPTIONS[name].map(String);
-        const hit = Object.keys(RH_KNOWN_FIELD_OPTIONS).find(k => k.toLowerCase() === name.toLowerCase());
-        if(hit) return RH_KNOWN_FIELD_OPTIONS[hit].map(String);
-    }
-    return null;
-}
-function rhDefaultValue(field){
-    let value = field?.fieldValue;
-    if(Array.isArray(value)) value = value[0];
-    if(value === undefined || value === null || typeof value === 'object') return '';
-    return String(value);
-}
-function rhRandomEnabled(field){
-    return rhFieldKind(field) === 'number' && field?.random_enabled === true;
-}
-function rhRandomActive(node, key){
-    node.rhRandomActive = node.rhRandomActive || {};
-    return node.rhRandomActive[key] !== false;
-}
-function toggleRhRandom(nodeId, key){
-    const node = nodes.find(n => n.id === nodeId);
-    if(!node) return;
-    const field = rhActiveFields(node).find(f => rhParamKey(f.nodeId, f.fieldName) === key);
-    if(!rhRandomEnabled(field)) return;
-    node.rhRandomActive = node.rhRandomActive || {};
-    node.rhRandomActive[key] = !rhRandomActive(node, key);
-    refreshNodes([node.id]);
-    scheduleSave();
-}
-function rhWorkflowNodeInfoList(data){
-    const list = [];
-    if(!data || typeof data !== 'object' || Array.isArray(data)) return list;
-    Object.entries(data).forEach(([nodeId, nodeContent]) => {
-        const inputs = nodeContent?.inputs || {};
-        if(!inputs || typeof inputs !== 'object') return;
-        Object.entries(inputs).forEach(([fieldName, rawValue]) => {
-            if(rhIsWorkflowLinkValue(rawValue)) return;
-            let fieldValue = rawValue;
-            if(fieldValue !== null && typeof fieldValue === 'object') fieldValue = JSON.stringify(fieldValue);
-            else if(fieldValue === undefined || fieldValue === null) fieldValue = '';
-            else fieldValue = String(fieldValue);
-            list.push({
-                nodeId:String(nodeId),
-                fieldName:String(fieldName),
-                fieldValue,
-                fieldType:rhInferWorkflowFieldType(fieldName, fieldValue),
-                source:'workflow'
-            });
-        });
-    });
-    return list;
-}
-function rhInferWorkflowFieldType(fieldName, fieldValue){
-    const key = `${fieldName || ''} ${fieldValue || ''}`.toLowerCase();
-    if(/\b(image|img|mask|photo|picture)\b/.test(key) || /\.(png|jpe?g|webp|gif|bmp)(\?|$)/i.test(key)) return 'IMAGE';
-    if(/\b(video|movie|mp4)\b/.test(key) || /\.(mp4|webm|mov|m4v|mkv)(\?|$)/i.test(key)) return 'VIDEO';
-    if(/\b(audio|sound|music|voice)\b/.test(key) || /\.(mp3|wav|ogg|m4a|flac|aac)(\?|$)/i.test(key)) return 'AUDIO';
-    if(/^(true|false)$/i.test(String(fieldValue || ''))) return 'BOOLEAN';
-    if(String(fieldValue || '').trim() !== '' && !Number.isNaN(Number(fieldValue))) return 'NUMBER';
-    return 'TEXT';
-}
-function rhIsWorkflowLinkValue(value){
-    return Array.isArray(value) && value.length === 2 && typeof value[0] === 'string' && Number.isInteger(value[1]);
-}
-function runningHubProvider(){
-    const provider = (apiProviders || []).find(p => p.id === 'runninghub');
-    return provider || null;
-}
-function runningHubEntries(kind){
-    const provider = runningHubProvider();
-    const key = kind === 'workflow' ? 'rh_workflows' : 'rh_apps';
-    return Array.isArray(provider?.[key]) ? provider[key].filter(item => item?.enabled !== false && item?.hidden !== true) : [];
-}
-function runningHubEntryId(entry, kind){
-    return String(kind === 'workflow' ? (entry?.workflowId || entry?.id || '') : (entry?.appId || entry?.id || '')).trim();
-}
-function runningHubEntryLabel(entry, kind){
-    const id = runningHubEntryId(entry, kind);
-    return entry?.title || entry?.name || (kind === 'workflow' ? `工作流 ${id.slice(-6)}` : `AI 应用 ${id.slice(-6)}`);
-}
-function runningHubEntryKey(kind, id){
-    return `${kind}:${String(id || '').trim()}`;
-}
-function parseRunningHubEntryKey(value){
-    const text = String(value || '').trim();
-    const match = text.match(/^(app|workflow):(.+)$/);
-    if(match) return {kind:match[1], id:match[2]};
-    return null;
-}
-function runningHubAllEntries(){
-    return [
-        ...runningHubEntries('app').map(entry => ({kind:'app', id:runningHubEntryId(entry, 'app'), entry})),
-        ...runningHubEntries('workflow').map(entry => ({kind:'workflow', id:runningHubEntryId(entry, 'workflow'), entry}))
-    ].filter(item => item.id);
-}
-function rhSelectedEntryRef(node){
-    const parsed = parseRunningHubEntryKey(node?.rhConfigKey || '');
-    const all = runningHubAllEntries();
-    if(parsed){
-        const hit = all.find(item => item.kind === parsed.kind && item.id === parsed.id);
-        if(hit) return hit;
-    }
-    const workflowId = validRunningHubWorkflowId(node?.workflowId || '');
-    if(workflowId){
-        const hit = all.find(item => item.kind === 'workflow' && item.id === workflowId);
-        if(hit) return hit;
-    }
-    const webappId = String(node?.webappId || '').trim();
-    if(webappId){
-        const hit = all.find(item => item.kind === 'app' && item.id === webappId);
-        if(hit) return hit;
-    }
-    return null;
-}
-function applyRhEntrySelection(node, ref){
-    if(!node || !ref) return;
-    node.rhConfigKey = runningHubEntryKey(ref.kind, ref.id);
-    node.rhMode = ref.kind;
-    if(ref.kind === 'workflow') node.workflowId = ref.id;
-    else node.webappId = ref.id;
-}
-function currentRunningHubAppConfig(node){
-    const webappId = String(node?.webappId || '').trim();
-    if(!webappId) return null;
-    return runningHubEntries('app').find(app => runningHubEntryId(app, 'app') === webappId) || null;
-}
-function currentRunningHubWorkflowEntry(node){
-    const workflowId = validRunningHubWorkflowId(node?.workflowId || '');
-    if(!workflowId) return null;
-    return runningHubEntries('workflow').find(workflow => runningHubEntryId(workflow, 'workflow') === workflowId) || null;
-}
-function rhEntryFields(entry){
-    return Array.isArray(entry?.fields) ? entry.fields : [];
-}
-function rhWorkflowJsonFromSources(...sources){
-    for(const source of sources){
-        if(source && typeof source === 'object' && Object.keys(source).length) return source;
-    }
-    return {};
-}
-function rhCurrentEntry(node){
-    return rhSelectedEntryRef(node)?.entry || null;
-}
-function rhCurrentKind(node){
-    return rhSelectedEntryRef(node)?.kind || (node?.rhMode === 'workflow' ? 'workflow' : 'app');
-}
-function ensureRhNodeSelection(node){
-    if(!node || node.type !== 'rh') return null;
-    node.rhPayment = node.rhPayment || 'free';
-    const all = runningHubAllEntries();
-    let ref = rhSelectedEntryRef(node);
-    if(!ref && all.length) ref = all[0];
-    if(ref){
-        applyRhEntrySelection(node, ref);
-        return ref.entry;
-    }
-    return null;
-}
-function rhEntryOptions(selected){
-    const apps = runningHubEntries('app');
-    const workflows = runningHubEntries('workflow');
-    if(!apps.length && !workflows.length) return `<option value="">请先在 API 设置里添加 RH 配置</option>`;
-    const group = (kind, entries, label) => entries.length ? `
-        <optgroup label="${label}">
-            ${entries.map(entry => {
-                const id = runningHubEntryId(entry, kind);
-                const key = runningHubEntryKey(kind, id);
-                return `<option value="${escapeAttr(key)}" ${String(selected || '') === key ? 'selected' : ''}>${escapeHtml(runningHubEntryLabel(entry, kind))}</option>`;
-            }).join('')}
-        </optgroup>
-    ` : '';
-    return `${group('app', apps, 'AI 应用')}${group('workflow', workflows, '工作流')}`;
-}
-function rhPaymentOptions(node){
-    const provider = runningHubProvider();
-    const selected = node.rhPayment === 'wallet' ? 'wallet' : 'free';
-    return `
-        <option value="free" ${selected === 'free' ? 'selected' : ''}>RH币 Key${provider?.has_key ? '' : '（未配置）'}</option>
-        <option value="wallet" ${selected === 'wallet' ? 'selected' : ''}>账户余额 Key${provider?.has_wallet_key ? '' : '（未配置）'}</option>
-    `;
-}
-function rhUseWallet(node){
-    return node?.rhPayment === 'wallet';
-}
-function rhActiveFields(node){
-    const sortFields = fields => [...(fields || [])].sort((a, b) => {
-        const ak = rhFieldKind(a), bk = rhFieldKind(b);
-        if(ak === 'image' && bk === 'image'){
-            const ao = Number(a.imageOrder) || 9999;
-            const bo = Number(b.imageOrder) || 9999;
-            if(ao !== bo) return ao - bo;
-        }
-        if(ak === 'image' && bk !== 'image') return -1;
-        if(ak !== 'image' && bk === 'image') return 1;
-        return String(a.nodeId || '').localeCompare(String(b.nodeId || ''), undefined, {numeric:true}) || String(a.fieldName || '').localeCompare(String(b.fieldName || ''));
-    });
-    if(rhCurrentKind(node) === 'workflow') {
-        const workflowId = validRunningHubWorkflowId(node.workflowId || '');
-        const savedEntry = currentRunningHubWorkflowEntry(node);
-        if(Array.isArray(savedEntry?.fields) && savedEntry.fields.length) return sortFields(savedEntry.fields.filter(f => f.enabled === true));
-        const saved = workflowId ? runningHubWorkflowCache[workflowId] : null;
-        if(Array.isArray(saved?.fields)) return sortFields(saved.fields.filter(f => f.enabled === true));
-        return sortFields(node.rhWorkflowInfo?.nodeInfoList || []);
-    }
-    const savedApp = currentRunningHubAppConfig(node);
-    if(Array.isArray(savedApp?.fields) && savedApp.fields.length) return sortFields(savedApp.fields.filter(f => f.enabled === true));
-    return sortFields(node.rhAppInfo?.nodeInfoList || []);
-}
-function currentRunningHubWorkflowConfig(node){
-    if(rhCurrentKind(node) !== 'workflow') return null;
-    const workflowId = validRunningHubWorkflowId(node.workflowId || '');
-    const entry = currentRunningHubWorkflowEntry(node);
-    if(entry){
-        const cached = workflowId ? runningHubWorkflowCache[workflowId] : null;
-        return {
-            ...entry,
-            ...(cached || {}),
-            workflowId:runningHubEntryId(entry, 'workflow') || workflowId,
-            title:entry.title || cached?.title || workflowId,
-            fields:rhEntryFields(entry).length ? rhEntryFields(entry) : (cached?.fields || []),
-            optionalImageMode:entry.optionalImageMode || cached?.optionalImageMode || 'prune-workflow',
-            workflowJson:rhWorkflowJsonFromSources(cached?.workflowJson, entry.workflowJson, entry.raw?.workflowJson, entry.raw?.prompt)
-        };
-    }
-    return workflowId ? runningHubWorkflowCache[workflowId] : null;
-}
-async function ensureRunningHubWorkflowConfigForNode(node){
-    if(rhCurrentKind(node) !== 'workflow') return null;
-    const workflowId = validRunningHubWorkflowId(node.workflowId || '');
-    if(!workflowId) return null;
-    if(!runningHubWorkflowCache[workflowId]){
-        try { await ensureRunningHubWorkflow(workflowId); } catch(_) {}
-    }
-    return currentRunningHubWorkflowConfig(node);
-}
-function rhMediaSources(node){
-    const sources = orderedSources(node, generatorSources(node));
-    const refs = sources.flatMap(src => src.refs || []).filter(ref => ref?.url);
-    return {
-        sources,
-        refs,
-        image:imageRefsOnly(refs),
-        video:videoRefsOnly(refs),
-        audio:audioRefsOnly(refs),
-        prompt:sources.map(src => src.prompt).filter(Boolean).join('\n\n')
-    };
-}
-function rhFieldIndexes(fields){
-    const counters = {image:0, video:0, audio:0};
-    const map = {};
-    const ordered = [...(fields || [])].sort((a, b) => {
-        const ak = rhFieldKind(a), bk = rhFieldKind(b);
-        if(ak === 'image' && bk === 'image'){
-            return (Number(a.imageOrder) || 9999) - (Number(b.imageOrder) || 9999);
-        }
-        return 0;
-    });
-    ordered.forEach(field => {
-        const kind = rhFieldKind(field);
-        if(['image','video','audio'].includes(kind)){
-            map[rhParamKey(field.nodeId, field.fieldName)] = counters[kind]++;
-        }
-    });
-    return map;
-}
-function rhFieldValue(node, field, media=null){
-    node.rhParams = node.rhParams || {};
-    const key = rhParamKey(field.nodeId, field.fieldName);
-    const kind = rhFieldKind(field);
-    const param = node.rhParams[key];
-    if(['image','video','audio'].includes(kind)){
-        const idx = rhFieldIndexes(rhActiveFields(node))[key] || 0;
-        const up = (media || rhMediaSources(node))[kind]?.[idx]?.url || '';
-        if(rhCurrentKind(node) === 'workflow' && kind === 'image' && field.required !== true && !up && param?.sourceFromUpstream !== false) return '';
-        if(param?.sourceFromUpstream === false) return param.value ?? rhDefaultValue(field);
-        return up || param?.value || rhDefaultValue(field);
-    }
-    if(rhRandomEnabled(field) && rhRandomActive(node, key)){
-        node.rhRandomValues = node.rhRandomValues || {};
-        if(node.rhRandomValues[key] === undefined){
-            node.rhRandomValues[key] = comfyRandomValue({
-                input:field.fieldName,
-                name:field.label || field.fieldName,
-                min:field.min,
-                max:field.max,
-                step:field.step,
-                type:'number'
-            });
-        }
-        return node.rhRandomValues[key];
-    }
-    if(rhFieldRole(field) === 'prompt'){
-        const upstreamPrompt = (media || rhMediaSources(node)).prompt || '';
-        return param?.value ?? (upstreamPrompt || rhDefaultValue(field));
-    }
-    return param?.value ?? rhDefaultValue(field);
-}
-function rhRequiredLabel(field){
-    return field?.label || field?.fieldName || `#${field?.nodeId || ''}`;
-}
-function rhPruneWorkflowForMissingFields(workflowJson, missingFields){
-    if(!workflowJson || typeof workflowJson !== 'object' || !missingFields?.length) return null;
-    const workflow = JSON.parse(JSON.stringify(workflowJson));
-    const removeIds = new Set();
-    missingFields.forEach(field => {
-        const node = workflow[String(field.nodeId)];
-        if(node?.inputs && Object.prototype.hasOwnProperty.call(node.inputs, field.fieldName)){
-            delete node.inputs[field.fieldName];
-        }
-        if(node && rhWorkflowNodeInfoList({[field.nodeId]: node}).length <= 0){
-            removeIds.add(String(field.nodeId));
-        }
-    });
-    removeIds.forEach(id => delete workflow[id]);
-    Object.values(workflow).forEach(node => {
-        if(!node?.inputs || typeof node.inputs !== 'object') return;
-        Object.entries(node.inputs).forEach(([name, value]) => {
-            if(rhIsWorkflowLinkValue(value) && removeIds.has(String(value[0]))) delete node.inputs[name];
-        });
-    });
-    return workflow;
-}
-async function rhBuildWorkflowRequestExtras(node, media, nodeInfoList){
-    const config = await ensureRunningHubWorkflowConfigForNode(node);
-    if(!config || (config.optionalImageMode || 'prune-workflow') !== 'prune-workflow') return {};
-    const fields = rhActiveFields(node);
-    const indexes = rhFieldIndexes(fields);
-    const missingOptional = [];
-    for(const field of fields){
-        if(rhFieldKind(field) !== 'image') continue;
-        const key = rhParamKey(field.nodeId, field.fieldName);
-        const idx = indexes[key] || 0;
-        const hasInput = Boolean(media.image?.[idx]?.url);
-        if(field.required === true && !hasInput){
-            throw new Error(`RunningHub 工作流缺少必选图片：${rhRequiredLabel(field)}`);
-        }
-        if(field.required !== true && !hasInput){
-            missingOptional.push(field);
-        }
-    }
-    if(!missingOptional.length) return {};
-    missingOptional.forEach(field => {
-        const key = rhParamKey(field.nodeId, field.fieldName);
-        const idx = nodeInfoList.findIndex(item => rhParamKey(item.nodeId, item.fieldName) === key);
-        if(idx >= 0) nodeInfoList.splice(idx, 1);
-    });
-    const workflow = rhPruneWorkflowForMissingFields(config.workflowJson || {}, missingOptional);
-    return workflow ? {workflow} : {};
-}
-function rhMediaPreviewHtml(ref, kind){
-    const safe = escapeAttr(ref?.url || '');
-    if(kind === 'video') return `<video src="${safe}" muted preload="metadata" playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video>`;
-    if(kind === 'audio') return `<i data-lucide="file-audio" class="w-6 h-6 text-slate-400"></i>`;
-    return safe && !isMissingAssetUrl(safe) ? `<img src="${safe}">` : `<i data-lucide="image" class="w-6 h-6 text-slate-400"></i>`;
-}
-function renderRhBody(node){
-    const wrap = document.createElement('div');
-    wrap.className = 'rh-body';
-    node.rhParams = node.rhParams || {};
-    const entry = ensureRhNodeSelection(node);
-    const selectedRef = rhSelectedEntryRef(node);
-    const media = rhMediaSources(node);
-    const fields = rhActiveFields(node);
-    const mode = selectedRef?.kind || rhCurrentKind(node);
-    const selectedId = selectedRef?.id || (mode === 'workflow' ? (node.workflowId || '') : (node.webappId || ''));
-    const selectedKey = selectedRef ? runningHubEntryKey(selectedRef.kind, selectedRef.id) : '';
-    const entryNote = entry?.note || entry?.description || '';
-    wrap.innerHTML = `
-        <div class="rh-top">
-            <label class="field rh-webapp-field">
-                <div class="setting-title">RunningHub 配置</div>
-                <select class="select-lite rh-entry-select">${rhEntryOptions(selectedKey)}</select>
-            </label>
-            <label class="field rh-payment-field">
-                <div class="setting-title">Key</div>
-                <select class="select-lite rh-payment-select">${rhPaymentOptions(node)}</select>
-            </label>
-            <label class="field rh-machine-field">
-                <div class="setting-title">显存</div>
-                <select class="select-lite rh-machine-select">
-                    <option value="" ${!node.instanceType ? 'selected' : ''}>24G</option>
-                    <option value="plus" ${node.instanceType === 'plus' ? 'selected' : ''}>48G</option>
-                </select>
-            </label>
-        </div>
-        <div class="rh-prompt-list"></div>
-        <div class="rh-media-section">
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">${tr('canvas.rhInputs')}</div>
-            <div class="input-list rh-input-list"></div>
-        </div>
-        <div class="rh-param-head">
-            <span>${mode === 'workflow' ? tr('canvas.rhWorkflowParams') : tr('canvas.rhParams')}</span>
-            <span>${fields.length}</span>
-        </div>
-        <div class="rh-param-list"></div>
-        <div class="gen-run-row">
-            <button class="gen-btn rh-run ${node.running ? 'running' : ''}" ${node.running ? 'disabled' : ''}><i data-lucide="workflow" class="w-4 h-4"></i>${node.running ? tr('canvas.rhRunning') : tr('canvas.rhRun')}</button>
-            ${cascadeBtnHtml(node)}
-        </div>
-        ${retryBarHtml(node)}
-    `;
-    const entrySelect = wrap.querySelector('.rh-entry-select');
-    if(entrySelect) entrySelect.onchange = e => {
-        const parsed = parseRunningHubEntryKey(e.target.value);
-        const ref = parsed ? runningHubAllEntries().find(item => item.kind === parsed.kind && item.id === parsed.id) : null;
-        if(ref) applyRhEntrySelection(node, ref);
-        node.rhParams = {};
-        node.rhRandomValues = {};
-        render();
-        scheduleSave();
-    };
-    const paymentSelect = wrap.querySelector('.rh-payment-select');
-    if(paymentSelect) paymentSelect.onchange = e => {
-        node.rhPayment = e.target.value === 'wallet' ? 'wallet' : 'free';
-        scheduleSave();
-    };
-    const machineSelect = wrap.querySelector('.rh-machine-select');
-    if(machineSelect) machineSelect.onchange = e => {
-        node.instanceType = e.target.value === 'plus' ? 'plus' : '';
-        scheduleSave();
-    };
-    renderRhPromptFields(wrap.querySelector('.rh-prompt-list'), node, fields);
-    renderRhInputs(wrap.querySelector('.rh-input-list'), node, media);
-    renderRhParams(wrap.querySelector('.rh-param-list'), node, fields, media);
-    wrap.querySelector('.rh-run').onclick = e => { e.stopPropagation(); runCanvasGenerate(node.id); };
-    bindCascadeButtons(wrap, node.id);
-    refreshIcons();
-    return wrap;
-}
-function renderRhInputs(list, node, media){
-    if(!list) return;
-    const refs = media.refs || [];
-    if(!refs.length){
-        list.innerHTML = `<div class="text-[11px] text-gray-300 py-2">${tr('canvas.groupEmpty')}</div>`;
-        return;
-    }
-    list.innerHTML = '';
-    refs.forEach((ref, i) => {
-        const kind = mediaKindForRef(ref);
-        const item = document.createElement('div');
-        item.className = 'input-item rh-input-item';
-        item.innerHTML = `<span class="input-index">${i + 1}</span>${rhMediaPreviewHtml(ref, kind)}<span class="input-label">${escapeHtml(nodeTitleForMedia({mediaKind:kind}))}</span>`;
-        list.appendChild(item);
-    });
-}
-function renderRhPromptFields(container, node, fields){
-    if(!container) return;
-    const prompts = (fields || []).filter(field => rhFieldRole(field) === 'prompt');
-    if(!prompts.length){
-        container.innerHTML = '';
-        return;
-    }
-    container.innerHTML = prompts.map(field => {
-        const key = rhParamKey(field.nodeId, field.fieldName);
-        const label = field.label || field.fieldName || 'Prompt';
-        const value = rhFieldValue(node, field, rhMediaSources(node));
-        return `<label class="field rh-prompt-field">
-            <div class="setting-title">${escapeHtml(label)}</div>
-            <textarea class="setting-input rh-param-input" data-rh-param="${escapeAttr(key)}" data-rh-role="prompt">${escapeHtml(value)}</textarea>
-        </label>`;
-    }).join('');
-    bindRhParamControls(container, node);
-}
-function renderRhParams(container, node, fields, media){
-    if(!container) return;
-    const params = (fields || []).filter(field => {
-        const role = rhFieldRole(field);
-        return !['image','video','audio','prompt'].includes(role);
-    });
-    if(!params.length){
-        container.innerHTML = `<div class="rh-empty">${tr('canvas.rhNoParams')}</div>`;
-        return;
-    }
-    container.innerHTML = params.map((field, i) => {
-        const key = rhParamKey(field.nodeId, field.fieldName);
-        const kind = rhFieldRole(field);
-        const options = rhExtractFieldOptions(field);
-        const value = rhFieldValue(node, field, media);
-        const label = field.label || field.fieldName || `Field ${i + 1}`;
-        const valueText = String(value ?? '');
-        const wide = kind === 'text' && (String(label).length > 18 || valueText.length > 28);
-        return renderRhSettingField(node, field, key, kind, label, value, options, wide);
-    }).join('');
-    bindRhParamControls(container, node);
-}
-function renderRhSettingField(node, field, key, kind, label, value, options, wide=false){
-    const safeLabel = escapeHtml(label);
-    if(kind === 'boolean'){
-        const active = String(value).toLowerCase() === 'true';
-        return `<div class="gen-settings-row rh-param-row ${wide ? 'wide' : ''}">
-            <button type="button" class="setting-check ${active ? 'active' : ''}" data-rh-param="${escapeAttr(key)}" data-rh-type="boolean"><span class="check-dot"></span>${safeLabel}</button>
-        </div>`;
-    }
-    if(options?.length){
-        return `<div class="gen-settings-row rh-param-row ${wide ? 'wide' : ''}">
-            <label class="field"><div class="setting-title">${safeLabel}</div><select class="select-lite rh-param-input" data-rh-param="${escapeAttr(key)}" data-rh-type="select" style="width:100%">${options.map(opt => `<option value="${escapeAttr(opt)}" ${String(value) === String(opt) ? 'selected' : ''}>${escapeHtml(opt)}</option>`).join('')}</select></label>
-        </div>`;
-    }
-    if(rhRandomEnabled(field)){
-        const active = rhRandomActive(node, key);
-        return `<div class="gen-settings-row rh-param-row ${wide ? 'wide' : ''}">
-            <div class="comfy-random-field">
-                <label class="field"><div class="setting-title">${safeLabel}</div><input class="setting-input rh-param-input" type="number" data-rh-param="${escapeAttr(key)}" data-rh-type="number" value="${escapeAttr(value)}" ${active ? 'disabled' : ''}></label>
-                <button class="tool-btn comfy-random-btn ${active ? 'active' : ''}" type="button" data-rh-random="${escapeAttr(key)}" title="${active ? '随机已开启，点击关闭' : '随机已关闭，点击开启'}"><i data-lucide="dice-5" class="w-4 h-4"></i></button>
-            </div>
-        </div>`;
-    }
-    const inputType = kind === 'number' ? 'number' : 'text';
-    return `<div class="gen-settings-row rh-param-row ${wide ? 'wide' : ''}">
-        <label class="field"><div class="setting-title">${safeLabel}</div><input class="setting-input rh-param-input" type="${inputType}" data-rh-param="${escapeAttr(key)}" data-rh-type="${escapeAttr(kind)}" value="${escapeAttr(value)}"></label>
-    </div>`;
-}
-function bindRhParamControls(container, node){
-    container.querySelectorAll('button[data-rh-param]').forEach(btn => {
-        btn.onmousedown = e => e.stopPropagation();
-        btn.onclick = e => {
-            e.stopPropagation();
-            const key = btn.dataset.rhParam;
-            node.rhParams = node.rhParams || {};
-            const field = rhActiveFields(node).find(f => rhParamKey(f.nodeId, f.fieldName) === key);
-            const cur = node.rhParams[key] || {};
-            const on = String(rhFieldValue(node, field)).toLowerCase() === 'true';
-            node.rhParams[key] = {...cur, value:String(!on)};
-            render();
-            scheduleSave();
-        };
-    });
-    container.querySelectorAll('input[data-rh-param], select[data-rh-param], textarea[data-rh-param]').forEach(control => {
-        control.onmousedown = e => e.stopPropagation();
-        control.onclick = e => e.stopPropagation();
-        control.oninput = control.onchange = e => {
-            const key = control.dataset.rhParam;
-            node.rhParams = node.rhParams || {};
-            const cur = node.rhParams[key] || {};
-            node.rhParams[key] = {...cur, value:e.target.value};
-            scheduleSave();
-        };
-    });
-    container.querySelectorAll('[data-rh-random]').forEach(btn => {
-        btn.onmousedown = e => e.stopPropagation();
-        btn.onclick = e => {
-            e.stopPropagation();
-            toggleRhRandom(node.id, btn.dataset.rhRandom);
-        };
-    });
-}
-async function rhFetchAppInfo(nodeId, showAlert=true){
-    const node = nodes.find(n => n.id === nodeId);
-    if(!node) return;
-    if(!String(node.webappId || '').trim()){
-        if(showAlert) alert(tr('canvas.rhNeedWebappId'));
-        return false;
-    }
-    node.rhFetching = true;
-    refreshNodes([node.id]);
-    try {
-        const res = await fetch(`/api/runninghub/app-info?webappId=${encodeURIComponent(node.webappId.trim())}`);
-        const data = await res.json();
-        if(!res.ok || data.success === false) throw new Error(data.detail || data.error || tr('canvas.rhFailed'));
-        node.rhAppInfo = data.data || {};
-        node.rhParams = node.rhParams || {};
-        (node.rhAppInfo.nodeInfoList || []).forEach(field => {
-            const key = rhParamKey(field.nodeId, field.fieldName);
-            if(!node.rhParams[key]) node.rhParams[key] = {value:rhDefaultValue(field)};
-        });
-        node.runStatus = '';
-        node.runError = '';
-        scheduleSave();
-        return true;
-    } catch(err) {
-        if(showAlert) alert(err.message || tr('canvas.rhFailed'));
-        return false;
-    } finally {
-        node.rhFetching = false;
-        refreshNodes([node.id]);
-    }
-}
-async function rhFetchWorkflowInfo(nodeId, showAlert=true){
-    const node = nodes.find(n => n.id === nodeId);
-    if(!node) return false;
-    if(!String(node.workflowId || '').trim()){
-        if(showAlert) alert(tr('canvas.rhNeedWorkflowId'));
-        return false;
-    }
-    node.rhFetching = true;
-    refreshNodes([node.id]);
-    try {
-        const saved = await ensureRunningHubWorkflow(node.workflowId.trim());
-        const res = await fetch(`/api/runninghub/workflow-info?workflowId=${encodeURIComponent(node.workflowId.trim())}`);
-        const data = await res.json();
-        if(!res.ok || data.success === false) throw new Error(data.detail || data.error || tr('canvas.rhFailed'));
-        const info = data.data || {};
-        const savedFields = Array.isArray(saved?.fields) ? saved.fields : [];
-        const mergedFields = savedFields.length
-            ? savedFields
-            : Array.isArray(info.nodeInfoList) ? info.nodeInfoList : [];
-        node.rhWorkflowInfo = {
-            workflowId:node.workflowId.trim(),
-            nodeInfoList:mergedFields,
-            raw:info.raw || null
-        };
-        node.rhParams = node.rhParams || {};
-        (node.rhWorkflowInfo.nodeInfoList || []).forEach(field => {
-            const key = rhParamKey(field.nodeId, field.fieldName);
-            if(!node.rhParams[key]) node.rhParams[key] = {value:rhDefaultValue(field)};
-        });
-        node.runStatus = '';
-        node.runError = '';
-        scheduleSave();
-        return true;
-    } catch(err) {
-        if(showAlert) alert(err.message || tr('canvas.rhFailed'));
-        return false;
-    } finally {
-        node.rhFetching = false;
-        refreshNodes([node.id]);
-    }
-}
-async function rhImportWorkflowJson(nodeId, file){
-    const node = nodes.find(n => n.id === nodeId);
-    if(!node || !file) return;
-    try {
-        const text = await file.text();
-        const json = JSON.parse(text);
-        const nodeInfoList = rhWorkflowNodeInfoList(json);
-        if(!nodeInfoList.length) throw new Error(tr('canvas.rhWorkflowJsonInvalid'));
-        node.rhMode = 'workflow';
-        node.rhWorkflowInfo = {fileName:file.name || 'api.json', nodeInfoList};
-        node.rhParams = node.rhParams || {};
-        nodeInfoList.forEach(field => {
-            const key = rhParamKey(field.nodeId, field.fieldName);
-            if(!node.rhParams[key]) node.rhParams[key] = {value:rhDefaultValue(field)};
-        });
-        node.runStatus = '';
-        node.runError = '';
-        render();
-        scheduleSave();
-    } catch(err) {
-        alert(err.message || tr('canvas.rhWorkflowJsonInvalid'));
-    }
-}
-async function rhUploadValueIfNeeded(value, node=null){
-    const text = String(value || '').trim();
-    if(!text) return '';
-    if(!/^https?:\/\//i.test(text) && !text.startsWith('/output/') && !text.startsWith('/assets/')) return text;
-    const res = await fetch('/api/runninghub/upload-asset', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({url:text, useWallet:rhUseWallet(node)})
-    });
-    const data = await res.json();
-    if(!res.ok || data.success === false) throw new Error(data.detail || data.error || tr('canvas.rhUploadFailed'));
-    return data.data?.fileName || text;
-}
-async function rhBuildNodeInfoList(node, media){
-    const fields = rhActiveFields(node);
-    const result = [];
-    const indexes = rhFieldIndexes(fields);
-    for(const field of fields){
-        const kind = rhFieldKind(field);
-        const key = rhParamKey(field.nodeId, field.fieldName);
-        if(rhCurrentKind(node) === 'workflow' && field.sourceFromUpstream === false && !['image','video','audio'].includes(kind)) continue;
-        if(rhCurrentKind(node) === 'workflow' && kind === 'image'){
-            const idx = indexes[key] || 0;
-            const hasInput = Boolean(media.image?.[idx]?.url);
-            if(field.required !== true && !hasInput) continue;
-        }
-        let value = rhFieldValue(node, field, media);
-        if(['image','video','audio'].includes(kind)) value = await rhUploadValueIfNeeded(value, node);
-        if(typeof value === 'string' && /[\r\n]/.test(value)) value = value.split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0] || '';
-        result.push({nodeId:field.nodeId, fieldName:field.fieldName, fieldValue:value});
-    }
-    return result;
-}
-async function runRhNode(nodeId, opts={}){
-    const node = nodes.find(n => n.id === nodeId);
-    if(!node || (node.running && !opts.cascade)) return;
-    const cascadeTargetId = cascadeTargetIdFromOptions(opts);
-    ensureRhNodeSelection(node);
-    const mode = rhCurrentKind(node);
-    node.rhRandomValues = {};
-    if(mode === 'workflow' && !String(node.workflowId || '').trim()){ alert(tr('canvas.rhNeedWorkflowId')); return; }
-    if(mode === 'app' && !String(node.webappId || '').trim()){ alert(tr('canvas.rhNeedWebappId')); return; }
-    const selectedEntry = rhCurrentEntry(node);
-    if(!selectedEntry){
-        alert(mode === 'workflow' ? '请先在 API 设置里添加 RH 工作流' : '请先在 API 设置里添加 RH 应用');
-        return;
-    }
-    if(mode === 'workflow') await ensureRunningHubWorkflowConfigForNode(node);
-    if(!rhActiveFields(node).length){
-        alert(mode === 'workflow' ? '请先在 API 设置里编辑并保存这个 RH 工作流参数' : '请先在 API 设置里编辑并保存这个 RH 应用参数');
-        return;
-    }
-    const media = rhMediaSources(node);
-    let out = outputForNode(node, 500);
-    const pendingId = uid('p');
-    const run = runSnapshot(node, media.prompt || 'RunningHub', media.refs);
-    run.taskLabel = 'RunningHub';
-    if(out) out._pending = [...(out._pending || []), makePendingForRun(pendingId, run, node, {refs:media.refs, cascadeTargetId})];
-    if(!opts.cascade) node.running = true;
-    refreshRunNodes(node, out);
-    try {
-        const nodeInfoList = await rhBuildNodeInfoList(node, media);
-        const workflowExtras = mode === 'workflow' ? await rhBuildWorkflowRequestExtras(node, media, nodeInfoList) : {};
-        const endpoint = mode === 'workflow' ? '/api/runninghub/workflow-submit' : '/api/runninghub/submit';
-        const body = mode === 'workflow'
-            ? {workflowId:node.workflowId.trim(), nodeInfoList, useWallet:rhUseWallet(node), ...workflowExtras}
-            : {webappId:node.webappId.trim(), nodeInfoList, instanceType:node.instanceType || '', useWallet:rhUseWallet(node)};
-        const submit = await cascadeFetch(endpoint, {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify(body)
-        }, {cascadeTargetId}).then(async r => {
-            const data = await r.json();
-            if(!r.ok || data.success === false) throw new Error(data.detail || data.error || tr('canvas.rhFailed'));
-            return data.data || data;
-        });
-        const taskId = submit.taskId;
-        if(!taskId) throw new Error(tr('canvas.rhNoTaskId'));
-        run.request = {task_id:taskId, webappId:node.webappId, workflowId:node.workflowId, backend:'runninghub', mode};
-        let result = null;
-        for(let i = 0; i < 720; i++){
-            if(cascadeTargetId) ensureCascadeActive(cascadeTargetId);
-            await sleep(2500);
-            const data = await cascadeFetch(`/api/runninghub/query?taskId=${encodeURIComponent(taskId)}`, {}, {cascadeTargetId}).then(async r => {
-                const json = await r.json();
-                if(!r.ok || json.success === false) throw new Error(json.detail || json.error || tr('canvas.rhFailed'));
-                return json.data || json;
-            });
-            if(data.status === 'SUCCESS'){
-                result = data;
-                break;
-            }
-            if(data.status === 'FAILED') throw new Error(data.failReason || tr('canvas.rhFailed'));
-        }
-        if(!result) throw new Error(tr('canvas.rhTimeout'));
-        const outputs = result.urls || [];
-        if(!outputs.length) throw new Error(tr('canvas.rhOutputsEmpty'));
-        const meta = collectRunMeta(out, pendingId);
-        if(out) out._pending = (out._pending || []).filter(p => p.id !== pendingId);
-        appendOutputImages(out, outputs, media.refs[0], [meta]);
-        mergeGeneratedOutputs(node, outputs, Boolean(opts.cascade));
-        addGenerationLog({run, outputs, runMs:meta.runMs || 0});
-        node.runStatus = 'done';
-        node.runError = '';
-        refreshRunNodes(node, out);
-        scheduleSave();
-    } catch(err) {
-        const meta = collectRunMeta(out, pendingId);
-        addGenerationLog({run, outputs:[], runMs:meta.runMs || 0, error:err.message || String(err)});
-        if(out) out._pending = (out._pending || []).filter(p => p.id !== pendingId);
-        if(isCascadeAbortError(err)){
-            if(opts.cascade) throw err;
-            return;
-        }
-        node.runStatus = 'failed';
-        node.runError = err.message || String(err);
-        refreshRunNodes(node, out);
-        if(opts.cascade) throw err;
-        alert(err.message || tr('canvas.rhFailed'));
-    } finally {
-        node.running = false;
-        refreshRunNodes(node, out);
-    }
-}
+// RH_KNOWN_FIELD_OPTIONS + rh* / runningHub* / runRhNode → engine-runninghub.js
 function renderComfySettings(container, node){
     const mode = node.mode || 'text';
     if(mode === 'text'){
@@ -9051,11 +7982,7 @@ function outputDownloadName(url){
     const ext = clean.includes('.') ? clean.split('.').pop() : 'png';
     return `canvas-output-${Date.now()}.${ext || 'png'}`;
 }
-function isVideoUrl(url){
-    if (typeof url !== 'string') return false;
-    const clean = url.split('?')[0].toLowerCase();
-    return /\.(mp4|webm|mov|m4v)$/.test(clean);
-}
+// isVideoUrl → utils.js
 function mediaKindForOutputItem(item){
     const explicit = String(item?.kind || item?.mediaKind || '').toLowerCase();
     if(['image','video','audio','text','file'].includes(explicit)) return explicit;
@@ -10806,5 +9733,33 @@ window.applyImageEdit = applyImageEdit;
 window.closeErrorModal = closeErrorModal;
 window.copyErrorMessage = copyErrorMessage;
 window.deleteNodeFromButton = deleteNodeFromButton;
+
+// CanvasApi 桥接：供 engine-runninghub.js 等外部模块调用画布内部函数
+window.CanvasApi = {
+    render: render,
+    scheduleSave: scheduleSave,
+    refreshNodes: refreshNodes,
+    refreshRunNodes: refreshRunNodes,
+    outputForNode: outputForNode,
+    runSnapshot: runSnapshot,
+    makePendingForRun: makePendingForRun,
+    appendOutputImages: appendOutputImages,
+    mergeGeneratedOutputs: mergeGeneratedOutputs,
+    addGenerationLog: addGenerationLog,
+    generatorSources: generatorSources,
+    orderedSources: orderedSources,
+    cascadeBtnHtml: cascadeBtnHtml,
+    retryBarHtml: retryBarHtml,
+    bindCascadeButtons: bindCascadeButtons,
+    runCanvasGenerate: runCanvasGenerate,
+    isMissingAssetUrl: isMissingAssetUrl,
+    nodeTitleForMedia: nodeTitleForMedia,
+    cascadeTargetIdFromOptions: cascadeTargetIdFromOptions,
+    ensureCascadeActive: ensureCascadeActive,
+    cascadeFetch: cascadeFetch,
+    sleep: sleep,
+    collectRunMeta: collectRunMeta,
+    isCascadeAbortError: isCascadeAbortError
+};
 
 })();

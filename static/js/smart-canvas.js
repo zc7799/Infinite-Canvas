@@ -358,10 +358,7 @@ function validOutpaintSize(node){
     const h = Math.round(Number(node?.outpaintSize?.height || 0));
     return w > 0 && h > 0 ? {width:w, height:h} : null;
 }
-function parseSizePair(value){
-    const match = String(value || '').match(/(\d+)\s*x\s*(\d+)/i);
-    return match ? {width:Number(match[1]), height:Number(match[2])} : null;
-}
+// parseSizePair → utils.js
 function nearestFourKSizeFor(width, height){
     const w = Math.max(1, Number(width) || 1);
     const h = Math.max(1, Number(height) || 1);
@@ -1045,10 +1042,7 @@ function renderManualVideoUrlControl(){
 function optionHtml(value, label, selected){
     return `<option value="${escapeHtml(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label ?? value)}</option>`;
 }
-function parseSizeValue(value){
-    const match = String(value || '').trim().match(/^(\d+)\s*[xX*]\s*(\d+)$/);
-    return match ? {width:match[1], height:match[2]} : null;
-}
+// parseSizeValue → utils.js
 function parseRatioValue(value){
     const raw = String(value || '').trim();
     const parts = raw.includes(':') ? raw.split(':') : raw.split(/[xX*]/);
@@ -1323,12 +1317,7 @@ function ratioLabel(prefix=''){
     const map = {square:'1:1', portrait:'2:3', landscape:'3:2', portrait43:'3:4', landscape43:'4:3', story:'9:16', wide:'16:9', source:sourceLabel, custom:settings[customKey] || tr('smart.custom')};
     return map[settings[ratioKey] || 'square'] || '1:1';
 }
-function gcdInt(a, b){
-    a = Math.abs(Math.round(Number(a) || 0));
-    b = Math.abs(Math.round(Number(b) || 0));
-    while(b){ const t = b; b = a % b; a = t; }
-    return a || 1;
-}
+// gcdInt → utils.js
 function imageSizeForRatio(img){
     const w = Math.round(Number(img?.natural_w || img?.width || img?.w || 0));
     const h = Math.round(Number(img?.natural_h || img?.height || img?.h || 0));
@@ -2977,9 +2966,7 @@ function imageRefsOnly(refs){
 function videoRefsOnly(refs){
     return (refs || []).filter(ref => ref?.url && mediaKindForItem(ref) === 'video');
 }
-function isRemoteVideoReferenceUrl(url){
-    return /^https?:\/\//i.test(String(url || '')) || /^asset:\/\//i.test(String(url || ''));
-}
+// isRemoteVideoReferenceUrl → utils.js
 function audioRefsOnly(refs){
     return (refs || []).filter(ref => ref?.url && mediaKindForItem(ref) === 'audio');
 }
