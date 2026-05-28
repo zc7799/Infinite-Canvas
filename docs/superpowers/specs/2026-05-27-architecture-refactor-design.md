@@ -1,13 +1,13 @@
 # Infinite-Canvas 架构重构设计文档
 
-**日期：** 2026-05-27
-**版本：** 1.2（新增上游同步策略）
+**日期：** 2026-05-28
+**版本：** 1.3（基于 upstream d86663c 更新，Loop 视频输入 + 媒体通用化）
 
 ## 1. 动机
 
 当前项目存在以下结构性问题：
 
-- **后端**：单文件 `main.py`（~7200 行），包含所有路由、业务逻辑、数据访问、Provider 调用，难以维护和测试。每次功能迭代（如最近新增的 LLM 反推视频、火山引擎视频增强）都在继续加重单文件负担。
+- **后端**：单文件 `main.py`（~7230 行），包含所有路由、业务逻辑、数据访问、Provider 调用，难以维护和测试。每次功能迭代（LLM 反推视频、火山引擎 Seedance2 适配、Loop 视频输入、媒体上传通用化）都在继续加重单文件负担。
 - **前端**：10 个独立 HTML 页面，对应的 JS 文件过于庞大（`canvas.js` 487KB，`smart-canvas.js` 458KB），无模块化、无类型检查、无构建工具。
 - **数据层**：JSON 文件直接读写，并发写入存在损坏风险，history.json 持续膨胀无归档。
 
@@ -53,14 +53,14 @@ server/
 │   ├── workflow_service.py  # ComfyUI 工作流管理
 │   ├── provider_service.py  # API Provider 配置管理
 │   ├── runninghub_service.py# RunningHub 提交/查询
-│   └── media_service.py     # 媒体处理：视频抽帧(ffmpeg)、图片压缩、data URL 转换
+│   └── media_service.py     # 媒体处理：视频抽帧(ffmpeg)、图片压缩、data URL 转换、云端上传
 │
 ├── providers/               # AI 后端适配器（ABC 基类 + 注册表）
 │   ├── base.py              # BaseProvider ABC: generate_image(), poll_task()
 │   ├── openai.py            # OpenAI 协议实现
-│   ├── apimart.py           # APIMart 异步协议
+│   ├── apimart.py           # APIMart 异步协议：veo31 时长/分辨率适配
 │   ├── gemini.py            # Gemini 实现
-│   ├── volcengine.py        # 火山引擎：视频生成参数处理、asset:// URI、seedance
+│   ├── volcengine.py        # 火山引擎：Seedance2 适配、视频参数、asset:// URI
 │   ├── runninghub.py        # RunningHub 实现
 │   └── modelscope.py        # ModelScope Z-Image / Qwen 系列
 │
@@ -168,7 +168,8 @@ src/
 │   │   ├── VideoNode.vue
 │   │   ├── TextNode.vue
 │   │   ├── NoteNode.vue
-│   │   └── GroupNode.vue
+│   │   ├── GroupNode.vue
+│   │   └── LoopNode.vue           # 循环节点（图片+视频批量输入）
 │   ├── components/
 │   │   ├── CanvasViewport.vue   # 无限画布视口（pan/zoom）
 │   │   ├── ConnectionLayer.vue  # SVG 连线层
@@ -367,3 +368,13 @@ export default defineConfig({
 - 每个 Vue 组件 ≤ 200 行
 - TypeScript 编译零错误（`tsc --noEmit`）
 - 画布节点可独立开发和测试
+
+## 9. 上游变更追踪
+
+| 上游 commit | 日期 | 变更摘要 | 对重构方案的影响 |
+|------------|------|---------|----------------|
+| `d86663c` | 05-27 | 运行说明更新 | 无影响 |
+| `201b21e` | 05-27 | sync app code 2026.05.27.2 — Seedance2 适配、APIMart veo3.1 时长、媒体上传通用化 | `is_volcengine_seedance2_model` → providers/volcengine.py；`apimart_veo31_duration` → providers/apimart.py；`local_media_path_for_cloud_upload` → services/media_service.py |
+| `c4337a6` | 05-27 | Merge PR #43 | 无影响 |
+| `6e1b383` | 05-27 | feat(canvas): Loop 节点支持视频输入 | canvas.js Loop 节点新增 videoInput/videoBatchSize 字段；新增 i18n key 4 个；媒体上传从视频专用改为通用 |
+| `bb2a725` | 05-27 | sync app code 2026.05.27.1 — LLM 反推视频、火山引擎视频增强 | 本次重构的基线版本 |
