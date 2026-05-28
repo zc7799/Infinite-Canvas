@@ -34,7 +34,7 @@ from server.config import (
     STATIC_DIR, STATIC_RUNNINGHUB_DIR, STATIC_RUNNINGHUB_THUMBNAIL_DIR,
     STATIC_RUNNINGHUB_API_PROVIDERS_FILE,
     OUTPUT_DIR, ASSETS_DIR, OUTPUT_INPUT_DIR, OUTPUT_OUTPUT_DIR,
-    ASSET_LIBRARY_DIR, HISTORY_FILE, API_ENV_FILE, DATA_DIR,
+    ASSET_LIBRARY_DIR, API_ENV_FILE, DATA_DIR,
     CONVERSATION_DIR, CANVAS_DIR, ASSET_LIBRARY_PATH,
     API_PROVIDERS_FILE, RUNNINGHUB_WORKFLOW_STORE_FILE,
     GLOBAL_CONFIG_FILE, CANVAS_TRASH_RETENTION_MS,
@@ -61,8 +61,33 @@ from server.config import (
     BACKEND_LOCAL_LOAD,
 )
 from server.exceptions import AppError, ProviderError, MediaError
-from server.data.history_store import HistoryStore
+from server.data.history_store import history_store
 from server.ws.manager import ConnectionManager
+from server.routes.history import router as history_router
+from server.services.media_service import (
+    output_storage, output_url_for, output_path_for, output_file_from_url,
+    origin_from_url, now_ms, sanitize_asset_name, sanitize_export_filename,
+    content_type_for_path, comfy_output_extension,
+    public_base_url, public_media_url_suffix, local_asset_public_url,
+    is_image_reference_value, is_video_reference_value, is_private_asset_url,
+    valid_video_image_input, invalid_video_image_preview,
+    convert_output_to_jpg, reference_to_data_url, media_reference_to_url,
+    compress_data_url_image, video_reference_to_frame_data_urls,
+    local_media_path_for_cloud_upload, local_video_path_for_cloud_upload,
+    upload_video_to_litterbox,
+)
+from server.providers.volcengine import (
+    volcengine_content_role, volcengine_video_duration,
+    volcengine_video_resolution, is_volcengine_seedance2_model,
+    is_volcengine_seedream_model,
+)
+from server.providers.apimart import (
+    apimart_video_duration, apimart_veo31_duration, is_apimart_veo31_model,
+    apimart_veo31_model, apimart_veo31_aspect, apimart_veo31_resolution,
+    apimart_video_reference_error, parse_size_pair, apimart_size_resolution,
+)
+from server.providers.modelscope import modelscope_image_url, modelscope_size
+from server.providers.gemini import gemini_image_config, gemini_model_name
 from server.models import (
     AIReference, ApiProviderPayload, AssetLibraryAddRequest,
     AssetLibraryCategoryRequest, AssetLibraryRenameRequest,
@@ -70,7 +95,7 @@ from server.models import (
     CanvasCreateRequest, CanvasLLMRequest, CanvasSaveRequest,
     CanvasVideoRequest, ChatRequest, CloudGenRequest, CloudPollRequest,
     CloudVideoUploadRequest, ComfyInstancesPayload, ConversationCreateRequest,
-    DeleteHistoryRequest, GenerateRequest, LocalImageImportRequest,
+    GenerateRequest, LocalImageImportRequest,
     MsGenerateRequest, OnlineImageRequest, RollbackRequest,
     RunningHubSubmitRequest, RunningHubUploadAssetRequest,
     RunningHubWorkflowConfig, RunningHubWorkflowConfigField,
@@ -79,8 +104,6 @@ from server.models import (
     TokenRequest, UpdateRequest, WorkflowConfig, WorkflowField,
     WorkflowRunRequest, WorkflowUploadRequest,
 )
-
-history_store = HistoryStore(HISTORY_FILE)
 
 QUIET_ACCESS_PATHS = {
     "/api/queue_status",
@@ -145,6 +168,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str = None):
     except Exception as e:
         print(f"WS Error: {e}")
         await manager.disconnect(websocket, client_id)
+
+app.include_router(history_router)
 
 # Locks and queue (will be migrated to respective stores)
 QUEUE = []
@@ -1274,36 +1299,6 @@ def download_image(comfy_address, comfy_url_path, prefix="studio_"):
             return comfy_url_path.replace("/view", "/api/view", 1)
         return full_url
 
-def comfy_output_extension(item):
-    filename = str((item or {}).get("filename") or "")
-    ext = os.path.splitext(filename)[1].lower()
-    if ext in {
-        ".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff",
-        ".mp4", ".webm", ".mov", ".m4v", ".avi", ".mkv",
-        ".mp3", ".wav", ".m4a", ".aac", ".ogg", ".flac",
-        ".txt", ".json", ".csv", ".srt", ".vtt", ".md",
-    }:
-        return ext
-    fmt = str((item or {}).get("format") or "").lower()
-    if "mpeg" in fmt or "mp3" in fmt:
-        return ".mp3"
-    if "wav" in fmt or "wave" in fmt:
-        return ".wav"
-    if "ogg" in fmt:
-        return ".ogg"
-    if "flac" in fmt:
-        return ".flac"
-    if "text" in fmt or "plain" in fmt:
-        return ".txt"
-    if "json" in fmt:
-        return ".json"
-    if "webm" in fmt:
-        return ".webm"
-    if "quicktime" in fmt or "mov" in fmt:
-        return ".mov"
-    if "mp4" in fmt or "h264" in fmt or "video" in fmt:
-        return ".mp4"
-    return ext or ".bin"
 
 def is_video_output_item(item):
     ext = comfy_output_extension(item)
@@ -1417,8 +1412,6 @@ def conversation_path(user_id, conversation_id):
         raise HTTPException(status_code=400, detail="无效的对话 ID")
     return os.path.join(user_dir(user_id), f"{cleaned}.json")
 
-def now_ms():
-    return int(time.time() * 1000)
 
 def save_conversation(user_id, conversation):
     with CONVERSATION_LOCK:
@@ -1648,11 +1641,6 @@ def preferred_chat_model(provider):
             return text_like_models[0]
     return models[0]
 
-def modelscope_size(value, fallback="1024x1024"):
-    size = str(value or fallback).strip().lower().replace("*", "x")
-    if re.fullmatch(r"\d{2,5}x\d{2,5}", size):
-        return size
-    raise HTTPException(status_code=400, detail=f"ModelScope size 格式不正确：{value or fallback}，应为 WxH，例如 1024x1024")
 
 def unwrap_apimart_response(raw):
     """APIMart 将标准 OpenAI 响应包在 {"code":200,"data":{...}} 里；如果检测到就解包。"""
@@ -1808,44 +1796,6 @@ async def wait_for_image_task(client, task_id, provider=None):
         await asyncio.sleep(min(interval, max(0.0, deadline - time.monotonic())))
     raise HTTPException(status_code=504, detail=f"生图任务超时（已等待 {int(timeout)} 秒），task_id={task_id}")
 
-def output_storage(category="output"):
-    return (OUTPUT_INPUT_DIR, "input") if category == "input" else (OUTPUT_OUTPUT_DIR, "output")
-
-def output_url_for(filename, category="output"):
-    _, subdir = output_storage(category)
-    return f"/assets/{subdir}/{filename}"
-
-def output_path_for(filename, category="output"):
-    folder, _ = output_storage(category)
-    return os.path.join(folder, filename)
-
-def output_file_from_url(url):
-    if isinstance(url, dict):
-        url = url.get("url", "")
-    if not url or not (url.startswith("/output/") or url.startswith("/assets/")):
-        return None
-    clean = urllib.parse.unquote(url.split("?", 1)[0]).replace("\\", "/")
-    if clean.startswith("/assets/"):
-        root = ASSETS_DIR
-        rel = clean[len("/assets/"):]
-    else:
-        root = OUTPUT_DIR
-        rel = clean[len("/output/"):]
-    rel = rel.lstrip("/")
-    if not rel:
-        return None
-    path = os.path.abspath(os.path.join(root, rel))
-    output_root = os.path.abspath(root)
-    if os.path.commonpath([output_root, path]) != output_root or not os.path.exists(path):
-        return None
-    return path
-
-def origin_from_url(value):
-    parsed = urllib.parse.urlparse(str(value or ""))
-    if parsed.scheme not in ("http", "https") or not parsed.netloc:
-        return ""
-    return f"{parsed.scheme}://{parsed.netloc}".lower()
-
 def ensure_same_origin_request(request: Request):
     host = str(request.headers.get("host") or "").lower()
     expected = f"{request.url.scheme}://{host}".lower() if host else ""
@@ -1962,143 +1912,13 @@ def find_asset_category(lib, category_id):
             return cat
     return None
 
-def sanitize_asset_name(name, fallback="asset"):
-    name = re.sub(r'[\\/:*?"<>|]+', "_", str(name or fallback)).strip()
-    return name[:120] or fallback
 
-def content_type_for_path(path):
-    ext = os.path.splitext(path)[1].lower()
-    if ext in [".mp4", ".m4v"]:
-        return "video/mp4"
-    if ext == ".webm":
-        return "video/webm"
-    if ext == ".mov":
-        return "video/quicktime"
-    if ext == ".mp3":
-        return "audio/mpeg"
-    if ext == ".wav":
-        return "audio/wav"
-    if ext == ".m4a":
-        return "audio/mp4"
-    if ext == ".aac":
-        return "audio/aac"
-    if ext == ".ogg":
-        return "audio/ogg"
-    if ext == ".flac":
-        return "audio/flac"
-    if ext == ".gif":
-        return "image/gif"
-    if ext in [".jpg", ".jpeg"]:
-        return "image/jpeg"
-    if ext == ".webp":
-        return "image/webp"
-    if ext == ".txt":
-        return "text/plain; charset=utf-8"
-    if ext == ".json":
-        return "application/json; charset=utf-8"
-    if ext == ".csv":
-        return "text/csv; charset=utf-8"
-    if ext == ".md":
-        return "text/markdown; charset=utf-8"
-    if ext == ".srt":
-        return "application/x-subrip; charset=utf-8"
-    if ext == ".vtt":
-        return "text/vtt; charset=utf-8"
-    if ext == ".png":
-        return "image/png"
-    return "application/octet-stream"
 
-def is_image_reference_value(value):
-    if not isinstance(value, str) or not value:
-        return False
-    if value.startswith("data:image/"):
-        return True
-    if value.startswith("data:"):
-        return False
-    if value.startswith("/output/") or value.startswith("/assets/"):
-        path = output_file_from_url(value)
-        return bool(path and content_type_for_path(path).startswith("image/"))
-    clean = value.split("?", 1)[0].lower()
-    if re.search(r"\.(mp4|webm|mov|m4v|mp3|wav|m4a|aac|ogg|flac)$", clean):
-        return False
-    return True
 
-def is_video_reference_value(value):
-    if not isinstance(value, str) or not value:
-        return False
-    if value.startswith("data:video/"):
-        return True
-    if value.startswith("data:"):
-        return False
-    if value.startswith("/output/") or value.startswith("/assets/"):
-        path = output_file_from_url(value)
-        return bool(path and content_type_for_path(path).startswith("video/"))
-    clean = value.split("?", 1)[0].lower()
-    return bool(re.search(r"\.(mp4|webm|mov|m4v|avi|mkv)$", clean))
 
-def convert_output_to_jpg(url, quality=88):
-    path = output_file_from_url(url)
-    if not path:
-        return url
-    root, ext = os.path.splitext(path)
-    if ext.lower() in [".jpg", ".jpeg"]:
-        return url
-    jpg_path = f"{root}.jpg"
-    try:
-        with Image.open(path) as img:
-            if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
-                bg = Image.new("RGB", img.size, (255, 255, 255))
-                bg.paste(img.convert("RGBA"), mask=img.convert("RGBA").split()[-1])
-                img = bg
-            else:
-                img = img.convert("RGB")
-            img.save(jpg_path, "JPEG", quality=quality, optimize=True)
-        try:
-            root = ASSETS_DIR if os.path.commonpath([os.path.abspath(ASSETS_DIR), os.path.abspath(jpg_path)]) == os.path.abspath(ASSETS_DIR) else OUTPUT_DIR
-        except ValueError:
-            root = OUTPUT_DIR
-        rel = os.path.relpath(jpg_path, root).replace("\\", "/")
-        prefix = "/assets" if root == ASSETS_DIR else "/output"
-        return f"{prefix}/{rel}"
-    except Exception as e:
-        print(f"转换 JPG 失败: {e}")
-        return url
 
-def reference_to_data_url(ref, max_size=None):
-    """把本地输出文件转为 data URL（base64）。max_size 限制最长边像素，避免 payload 过大。"""
-    path = output_file_from_url(ref.get("url", ""))
-    if not path:
-        return ref.get("url", "")
-    if max_size:
-        try:
-            with Image.open(path) as img:
-                img.load()
-                w, h = img.size
-                if max(w, h) > max_size:
-                    img.thumbnail((max_size, max_size), Image.LANCZOS)
-                if img.mode not in ("RGB", "RGBA"):
-                    img = img.convert("RGB")
-                buf = BytesIO()
-                fmt = "PNG" if img.mode == "RGBA" else "JPEG"
-                img.save(buf, format=fmt, quality=88 if fmt == "JPEG" else None)
-                encoded = base64.b64encode(buf.getvalue()).decode("ascii")
-                mime = "image/png" if fmt == "PNG" else "image/jpeg"
-                return f"data:{mime};base64,{encoded}"
-        except Exception as e:
-            print(f"reference resize failed, fallback to raw: {e}")
-    with open(path, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode("ascii")
-    return f"data:{content_type_for_path(path)};base64,{encoded}"
 
-def media_reference_to_url(value, max_image_size=None):
-    if not isinstance(value, str) or not value:
-        return ""
-    if value.startswith("/output/") or value.startswith("/assets/"):
-        return reference_to_data_url({"url": value}, max_size=max_image_size)
-    return value
 
-def is_private_asset_url(value: str) -> bool:
-    return isinstance(value, str) and value.strip().startswith("asset://")
 
 def volcengine_media_reference_url(value, max_image_size=1536):
     if not isinstance(value, str):
@@ -2112,138 +1932,13 @@ def volcengine_media_reference_url(value, max_image_size=1536):
         return reference_to_data_url({"url": value}, max_size=max_image_size)
     return value
 
-def volcengine_content_role(role: str, kind: str = "image") -> str:
-    value = str(role or "").strip().lower()
-    allowed = {
-        "first_frame", "last_frame", "reference_image",
-        "reference_video", "video", "image"
-    }
-    if value in allowed:
-        return "reference_video" if value == "video" and kind == "video" else value
-    if kind == "video":
-        return "reference_video"
-    return "reference_image"
 
-def volcengine_video_duration(duration) -> int:
-    try:
-        value = int(duration)
-    except Exception:
-        value = 5
-    return max(1, min(60, value))
 
-def volcengine_video_resolution(value: str) -> str:
-    text = str(value or "").strip().lower()
-    aliases = {"": "", "auto": "", "480": "480p", "720": "720p", "1080": "1080p"}
-    text = aliases.get(text, text)
-    return text if text in {"480p", "720p", "1080p"} else ""
 
-def is_volcengine_seedance2_model(model: str) -> bool:
-    value = str(model or "").strip().lower().replace("_", "-").replace(".", "-")
-    return "seedance-2-0" in value
 
-async def video_reference_to_frame_data_urls(value, max_frames=6, max_size=768):
-    if not isinstance(value, str) or not value:
-        return []
-    path = output_file_from_url(value)
-    cleanup_path = ""
-    if not path and value.startswith(("http://", "https://")):
-        suffix = os.path.splitext(urllib.parse.urlparse(value).path)[1] or ".mp4"
-        fd, cleanup_path = tempfile.mkstemp(prefix="canvas_llm_video_", suffix=suffix)
-        os.close(fd)
-        try:
-            async with httpx.AsyncClient(timeout=httpx.Timeout(connect=20.0, read=120.0, write=30.0, pool=10.0)) as client:
-                response = await client.get(value)
-                response.raise_for_status()
-                with open(cleanup_path, "wb") as f:
-                    f.write(response.content)
-            path = cleanup_path
-        except Exception as e:
-            print(f"[canvas-llm] video download failed: {e}")
-            if cleanup_path and os.path.exists(cleanup_path):
-                try: os.remove(cleanup_path)
-                except OSError: pass
-            return []
-    if not path or not os.path.exists(path):
-        return []
-    frame_dir = tempfile.mkdtemp(prefix="canvas_llm_frames_")
-    try:
-        ffmpeg = shutil.which("ffmpeg")
-        if not ffmpeg:
-            return []
-        pattern = os.path.join(frame_dir, "frame_%03d.jpg")
-        cmd = [
-            ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
-            "-i", path,
-            "-vf", f"fps=1,scale='min({max_size},iw)':-2",
-            "-frames:v", str(max(1, max_frames)),
-            pattern
-        ]
-        proc = await asyncio.to_thread(subprocess.run, cmd, capture_output=True, text=True, timeout=90)
-        if proc.returncode != 0:
-            print(f"[canvas-llm] ffmpeg frame extract failed: {proc.stderr[:300]}")
-            return []
-        frames = []
-        for name in sorted(os.listdir(frame_dir)):
-            if not name.lower().endswith((".jpg", ".jpeg", ".png")):
-                continue
-            frame_path = os.path.join(frame_dir, name)
-            with open(frame_path, "rb") as f:
-                frames.append(f"data:image/jpeg;base64,{base64.b64encode(f.read()).decode('ascii')}")
-        return frames
-    finally:
-        shutil.rmtree(frame_dir, ignore_errors=True)
-        if cleanup_path and os.path.exists(cleanup_path):
-            try: os.remove(cleanup_path)
-            except OSError: pass
 
-def compress_data_url_image(value, max_size=1536, jpeg_quality=88):
-    if not isinstance(value, str) or not value.startswith("data:image/") or ";base64," not in value:
-        return value
-    header, encoded = value.split(";base64,", 1)
-    try:
-        raw = base64.b64decode(encoded)
-        with Image.open(BytesIO(raw)) as img:
-            img.load()
-            if max_size and max(img.size) > max_size:
-                img.thumbnail((max_size, max_size), Image.LANCZOS)
-            has_alpha = img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info)
-            if has_alpha:
-                if img.mode != "RGBA":
-                    img = img.convert("RGBA")
-                fmt, mime = "PNG", "image/png"
-            else:
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                fmt, mime = "JPEG", "image/jpeg"
-            buf = BytesIO()
-            if fmt == "JPEG":
-                img.save(buf, format=fmt, quality=jpeg_quality, optimize=True)
-            else:
-                img.save(buf, format=fmt, optimize=True)
-            return f"data:{mime};base64,{base64.b64encode(buf.getvalue()).decode('ascii')}"
-    except Exception as e:
-        print(f"data url image compress failed, fallback to raw: {e}")
-        return value
 
-def modelscope_image_url(value, max_size=1536):
-    if not value:
-        return value
-    if isinstance(value, str) and (value.startswith("/output/") or value.startswith("/assets/")):
-        return reference_to_data_url({"url": value}, max_size=max_size)
-    if isinstance(value, str) and value.startswith("data:image/"):
-        return compress_data_url_image(value, max_size=max_size)
-    return value
 
-def valid_video_image_input(value: str) -> bool:
-    if not isinstance(value, str):
-        return False
-    value = value.strip()
-    return (
-        value.startswith("http://") or
-        value.startswith("https://") or
-        value.startswith("asset://") or
-        (value.startswith("data:image/") and ";base64," in value)
-    )
 
 def valid_apimart_video_image_input(value: str) -> bool:
     if not isinstance(value, str):
@@ -2251,32 +1946,8 @@ def valid_apimart_video_image_input(value: str) -> bool:
     value = value.strip()
     return value.startswith("http://") or value.startswith("https://") or value.startswith("asset://")
 
-def public_base_url() -> str:
-    value = (
-        os.getenv("PUBLIC_MEDIA_BASE_URL") or
-        PUBLIC_MEDIA_BASE_URL or
-        os.getenv("PUBLIC_BASE_URL") or
-        PUBLIC_BASE_URL or
-        ""
-    ).strip().rstrip("/")
-    if value and re.match(r"^https?://", value, re.I):
-        return value
-    return ""
 
-def public_media_url_suffix() -> str:
-    token = str(os.getenv("PUBLIC_MEDIA_TOKEN") or "").strip()
-    return f"?token={urllib.parse.quote(token)}" if token else ""
 
-def local_asset_public_url(value: str) -> str:
-    text = str(value or "").strip()
-    if not text.startswith(("/output/", "/assets/")):
-        return ""
-    if not output_file_from_url(text):
-        return ""
-    base = public_base_url()
-    if not base:
-        return ""
-    return f"{base}{urllib.parse.quote(text, safe='/:?&=%#.-_~')}{public_media_url_suffix()}"
 
 def normalize_apimart_video_reference(value: str) -> str:
     text = str(value or "").strip()
@@ -2284,64 +1955,12 @@ def normalize_apimart_video_reference(value: str) -> str:
         return text
     return local_asset_public_url(text)
 
-def apimart_video_reference_error(value: str) -> str:
-    text = str(value or "").strip()
-    if not text:
-        return "空的视频地址"
-    if text.startswith(("/output/", "/assets/")):
-        if not output_file_from_url(text):
-            return "这是本地画布文件路径，但后端没有找到对应文件，请重新上传视频后再试。"
-        return (
-            "这是本地画布文件，APIMart 无法访问 127.0.0.1/局域网路径；"
-            "请在 API/.env 配置 PUBLIC_MEDIA_BASE_URL 或 PUBLIC_BASE_URL 为可公网访问的媒体地址（例如内网穿透 HTTPS 地址），"
-            "或改用公网 http/https 视频 URL、审核后的 asset:// 地址。"
-        )
-    if text.startswith("data:") or text.startswith("blob:") or text.startswith("file:"):
-        return (
-            "APIMart 的 video_urls 不支持 data/blob/file 地址；"
-            "请改用公网 http/https 视频 URL，或审核后的 asset:// 地址。"
-        )
-    return "APIMart 的 video_urls 只支持公网 http/https URL 或 asset:// 私域素材 URL。"
 
-def apimart_video_duration(duration) -> int:
-    try:
-        value = int(duration)
-    except Exception:
-        value = 5
-    return max(4, min(15, value))
 
-def apimart_veo31_duration(duration) -> int:
-    try:
-        value = int(duration)
-    except Exception:
-        value = 8
-    # APIMart VEO 3.1 currently accepts a narrower duration window than
-    # the generic UI. Clamp instead of silently forcing every request to 8s.
-    return max(4, min(8, value))
 
-def is_apimart_veo31_model(model: str) -> bool:
-    return str(model or "").strip().lower().startswith("veo3.1")
 
-def apimart_veo31_model(model: str) -> str:
-    value = str(model or "").strip().lower()
-    aliases = {
-        "veo3.1": "veo3.1-fast",
-        "veo3.1-pro": "veo3.1-quality",
-        "veo3.1-preview": "veo3.1-fast",
-    }
-    value = aliases.get(value, value or "veo3.1-fast")
-    allowed = {"veo3.1-fast", "veo3.1-quality", "veo3.1-lite"}
-    return value if value in allowed else "veo3.1-fast"
 
-def apimart_veo31_aspect(aspect: str) -> str:
-    value = str(aspect or "16:9").strip()
-    return value if value in {"16:9", "9:16"} else "16:9"
 
-def apimart_veo31_resolution(resolution: str) -> str:
-    value = str(resolution or "").strip().lower()
-    aliases = {"": "720p", "auto": "720p", "480p": "720p", "780p": "720p", "1080": "1080p", "4k": "4k"}
-    value = aliases.get(value, value)
-    return value if value in {"720p", "1080p", "4k"} else "720p"
 
 def apimart_upload_file_payload(path: str):
     """Return (filename, bytes, content_type), keeping APIMart VEO images under the documented 10MB limit."""
@@ -2365,11 +1984,6 @@ def apimart_upload_file_payload(path: str):
             quality -= 8
     raise ValueError("图片超过 10MB，且压缩后仍无法满足 VEO3.1 图片限制")
 
-def invalid_video_image_preview(value: str) -> str:
-    text = str(value or "")
-    if text.startswith("data:"):
-        return text.split(";base64,", 1)[0] + ";base64,..."
-    return text[:120]
 
 def extract_apimart_asset_url(payload):
     if isinstance(payload, list):
@@ -2534,49 +2148,8 @@ async def upload_video_for_apimart(client, provider, ref_url: str) -> str:
             print(f"APIMart 视频上传异常: {last_error}")
     return f"ERR:APIMart 未提供可用的视频文件上传入口（{last_error}）。请配置 PUBLIC_BASE_URL，或使用公网 http/https / asset:// 视频地址。"
 
-def local_media_path_for_cloud_upload(ref_url: str, allowed_prefixes=("image/", "video/")) -> str:
-    ref_url = str(ref_url or "").strip()
-    if not ref_url:
-        raise HTTPException(status_code=400, detail="没有可上传的媒体文件")
-    if ref_url.startswith("http://") or ref_url.startswith("https://"):
-        return ""
-    if not (ref_url.startswith("/output/") or ref_url.startswith("/assets/")):
-        raise HTTPException(status_code=400, detail="云端上传只支持画布里的本地图片或视频文件")
-    path = output_file_from_url(ref_url)
-    if not path:
-        raise HTTPException(status_code=404, detail="本地媒体文件不存在或已被删除")
-    ct = content_type_for_path(path)
-    if not any(ct.startswith(prefix) for prefix in allowed_prefixes):
-        raise HTTPException(status_code=400, detail="请选择图片或视频文件再上传云端")
-    max_bytes = int(os.getenv("TEMP_SH_MAX_BYTES", str(4 * 1024 * 1024 * 1024)))
-    size = os.path.getsize(path)
-    if size > max_bytes:
-        raise HTTPException(status_code=400, detail=f"媒体文件超过云端上传大小限制：{size} bytes")
-    return path
 
-def local_video_path_for_cloud_upload(ref_url: str) -> str:
-    return local_media_path_for_cloud_upload(ref_url, ("video/",))
 
-async def upload_video_to_litterbox(path: str, source_url: str) -> Dict[str, str]:
-    upload_url = os.getenv("LITTERBOX_UPLOAD_URL", "https://litterbox.catbox.moe/resources/internals/api.php").strip() or "https://litterbox.catbox.moe/resources/internals/api.php"
-    time_value = os.getenv("LITTERBOX_TIME", "72h").strip() or "72h"
-    ct = content_type_for_path(path)
-    try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(connect=20.0, read=600.0, write=600.0, pool=20.0), follow_redirects=True) as client:
-            with open(path, "rb") as fh:
-                files = {"fileToUpload": (os.path.basename(path), fh, ct)}
-                data = {"reqtype": "fileupload", "time": time_value}
-                response = await client.post(upload_url, data=data, files=files)
-        if not response.is_success:
-            raise HTTPException(status_code=response.status_code, detail=f"Litterbox 上传失败：{response.text[:300]}")
-        direct_url = response.text.strip().splitlines()[0].strip()
-        if not re.match(r"^https?://", direct_url, re.I):
-            raise HTTPException(status_code=502, detail=f"Litterbox 返回了无法识别的链接：{response.text[:300]}")
-        return {"url": direct_url, "source": source_url, "name": os.path.basename(path), "expires": time_value, "service": "litterbox"}
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Litterbox 上传异常：{exc}") from exc
 
 async def upload_video_to_temp_sh(path: str, source_url: str) -> Dict[str, str]:
     upload_url = os.getenv("TEMP_SH_UPLOAD_URL", "https://temp.sh/upload").strip() or "https://temp.sh/upload"
@@ -2684,11 +2257,6 @@ async def save_remote_video_to_output(url, prefix="video_", category="output"):
         print(f"保存上游视频失败: {e}")
         return url
 
-def parse_size_pair(size):
-    match = re.fullmatch(r"\s*(\d+)\s*[xX*]\s*(\d+)\s*", str(size or ""))
-    if not match:
-        return 0, 0
-    return int(match.group(1)), int(match.group(2))
 
 GPT_IMAGE2_MAX_EDGE = 3840
 GPT_IMAGE2_MAX_PIXELS = 8_294_400
@@ -2721,32 +2289,6 @@ def normalize_gpt_image_2_size(size):
         height = int((height * grow + 15) // 16) * 16
     return f"{width}x{height}"
 
-def apimart_size_resolution(size):
-    width, height = parse_size_pair(size)
-    if not width or not height:
-        raw = str(size or "").strip().lower()
-        if raw in {"1k", "2k", "4k"}:
-            return "1:1", raw
-        if re.fullmatch(r"(auto|\d+\s*:\s*\d+)", raw):
-            return raw.replace(" ", ""), "1k"
-        return "1:1", "1k"
-    long_edge = max(width, height)
-    pixels = width * height
-    if long_edge >= 3000 or pixels > 4_500_000:
-        resolution = "4k"
-    elif long_edge >= 1800 or pixels > 1_800_000:
-        resolution = "2k"
-    else:
-        resolution = "1k"
-    common = [
-        (1, 1, "1:1"), (3, 2, "3:2"), (2, 3, "2:3"), (4, 3, "4:3"), (3, 4, "3:4"),
-        (5, 4, "5:4"), (4, 5, "4:5"), (16, 9, "16:9"), (9, 16, "9:16"),
-        (2, 1, "2:1"), (1, 2, "1:2"), (3, 1, "3:1"), (1, 3, "1:3"),
-        (21, 9, "21:9"), (9, 21, "9:21"),
-    ]
-    ratio = width / height
-    best = min(common, key=lambda item: abs(ratio - item[0] / item[1]))
-    return best[2], resolution
 
 VOLCENGINE_MIN_PIXELS = 3_686_400
 VOLCENGINE_MIN_EDGE = 1536
@@ -2765,9 +2307,6 @@ VOLCENGINE_RATIO_CHOICES = [
     (4, 5, "4:5"),
 ]
 
-def is_volcengine_seedream_model(model):
-    value = str(model or "").strip().lower()
-    return "seedream" in value or "doubao-seedream" in value
 
 def normalize_volcengine_size(size, model=""):
     width, height = parse_size_pair(size)
@@ -2930,25 +2469,11 @@ async def generate_modelscope_provider_image(prompt, size, model, reference_imag
                 raise HTTPException(status_code=502, detail=f"ModelScope 任务失败：{detail}")
         raise HTTPException(status_code=504, detail=f"ModelScope 生图任务超时：{last_payload}")
 
-def gemini_model_name(model):
-    value = selected_model(model, "gemini-3-pro-image-preview").strip()
-    return value[len("models/"):] if value.startswith("models/") else value
 
 def gemini_endpoint_url(provider, model):
     model_name = urllib.parse.quote(gemini_model_name(model), safe="")
     return provider_endpoint_url(provider, "image_generation_endpoint", f"/v1beta/models/{model_name}:generateContent")
 
-def gemini_image_config(size):
-    width, height = parse_size_pair(size)
-    if not width or not height:
-        raw = str(size or "").strip().upper()
-        if raw in {"1K", "2K", "4K"}:
-            return {"aspectRatio": "1:1", "imageSize": raw}
-        if re.fullmatch(r"\d+\s*:\s*\d+", raw):
-            return {"aspectRatio": raw.replace(" ", ""), "imageSize": "1K"}
-        return {"aspectRatio": "1:1", "imageSize": "2K"}
-    aspect_ratio, resolution = apimart_size_resolution(size)
-    return {"aspectRatio": aspect_ratio, "imageSize": resolution.upper()}
 
 def gemini_reference_part(ref):
     value = reference_to_data_url(ref, max_size=1536)
@@ -4884,11 +4409,6 @@ async def download_canvas_assets(payload: CanvasAssetDownloadRequest):
     headers = {"Content-Disposition": f"attachment; filename*=UTF-8''{encoded}"}
     return Response(buffer.getvalue(), media_type="application/zip", headers=headers)
 
-def sanitize_export_filename(name: str, fallback: str) -> str:
-    base = os.path.basename(str(name or "").strip()) or fallback
-    base = re.sub(r'[\\/:*?"<>|]+', "_", base)
-    return base or fallback
-
 def smart_group_export_folder(folder: str, group_name: str) -> str:
     text = str(folder or "").strip()
     if text:
@@ -5264,16 +4784,6 @@ async def chat_stream(payload: ChatRequest, request: Request, x_user_id: str = H
 
     return StreamingResponse(stream(), media_type="text/event-stream")
 
-# --- 历史记录 ---
-
-@app.get("/api/history")
-async def get_history_api(type: str = None):
-    try:
-        return history_store.list(type_filter=type)
-    except Exception as e:
-        print(f"读取历史文件失败: {e}")
-        return []
-
 @app.get("/api/queue_status")
 async def get_queue_status(client_id: str):
     with QUEUE_LOCK:
@@ -5281,25 +4791,6 @@ async def get_queue_status(client_id: str):
         positions = [i + 1 for i, t in enumerate(QUEUE) if t["client_id"] == client_id]
         position = positions[0] if positions else 0
     return {"total": total, "position": position}
-
-@app.post("/api/history/delete")
-async def delete_history(req: DeleteHistoryRequest):
-    try:
-        target_record = history_store.delete_by_timestamp(req.timestamp)
-        if target_record:
-            for img_url in target_record.get("images", []):
-                file_path = output_file_from_url(img_url)
-                if file_path and os.path.exists(file_path):
-                    try:
-                        os.remove(file_path)
-                    except Exception as e:
-                        print(f"Failed to delete file {file_path}: {e}")
-            return {"success": True}
-        else:
-            return {"success": False, "message": "Record not found"}
-    except Exception as e:
-        print(f"Delete history error: {e}")
-        return {"success": False, "message": str(e)}
 
 # --- ModelScope 角度控制 ---
 

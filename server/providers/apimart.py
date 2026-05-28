@@ -1,5 +1,42 @@
 """APIMart Provider 工具函数"""
 
+import re
+
+
+def parse_size_pair(size):
+    match = re.fullmatch(r"\s*(\d+)\s*[xX*]\s*(\d+)\s*", str(size or ""))
+    if not match:
+        return 0, 0
+    return int(match.group(1)), int(match.group(2))
+
+
+def apimart_size_resolution(size):
+    width, height = parse_size_pair(size)
+    if not width or not height:
+        raw = str(size or "").strip().lower()
+        if raw in {"1k", "2k", "4k"}:
+            return "1:1", raw
+        if re.fullmatch(r"(auto|\d+\s*:\s*\d+)", raw):
+            return raw.replace(" ", ""), "1k"
+        return "1:1", "1k"
+    long_edge = max(width, height)
+    pixels = width * height
+    if long_edge >= 3000 or pixels > 4_500_000:
+        resolution = "4k"
+    elif long_edge >= 1800 or pixels > 1_800_000:
+        resolution = "2k"
+    else:
+        resolution = "1k"
+    common = [
+        (1, 1, "1:1"), (3, 2, "3:2"), (2, 3, "2:3"), (4, 3, "4:3"), (3, 4, "3:4"),
+        (5, 4, "5:4"), (4, 5, "4:5"), (16, 9, "16:9"), (9, 16, "9:16"),
+        (2, 1, "2:1"), (1, 2, "1:2"), (3, 1, "3:1"), (1, 3, "1:3"),
+        (21, 9, "21:9"), (9, 21, "9:21"),
+    ]
+    ratio = width / height
+    best = min(common, key=lambda item: abs(ratio - item[0] / item[1]))
+    return best[2], resolution
+
 
 def apimart_video_duration(duration) -> int:
     try:

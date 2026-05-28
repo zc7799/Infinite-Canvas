@@ -3,7 +3,7 @@ import os
 import time
 from typing import Any, Dict, List, Optional
 
-from server.config import DATA_DIR
+from server.config import DATA_DIR, HISTORY_FILE
 from server.data.base_store import JsonStore
 
 
@@ -90,3 +90,6 @@ class HistoryStore(JsonStore):
             with open(archive_path, "w", encoding="utf-8") as f:
                 json.dump(existing, f, ensure_ascii=False, indent=2)
             self._atomic_write(active)
+
+
+history_store = HistoryStore(HISTORY_FILE)
