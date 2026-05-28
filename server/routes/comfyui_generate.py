@@ -19,7 +19,7 @@ from server.models import GenerateRequest
 from server.services.comfyui_service import (
     collect_comfy_file_items, collect_required_comfy_media,
     comfy_output_kind, comfy_text_values_from_output,
-    download_comfy_output, get_best_backend, get_comfy_history,
+    download_comfy_output, reserve_best_backend, get_comfy_history,
     save_comfy_text_output, save_to_history,
 )
 from server.services.media_service import convert_output_to_jpg
@@ -44,9 +44,7 @@ def generate(req: GenerateRequest):
     try:
         required_images = collect_required_comfy_media(req.params)
 
-        target_backend = get_best_backend(required_images)
-        with LOAD_LOCK:
-            BACKEND_LOCAL_LOAD[target_backend] += 1
+        target_backend = reserve_best_backend(required_images)
 
         for image_name in required_images:
             need_sync = False
