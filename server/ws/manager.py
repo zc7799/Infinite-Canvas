@@ -77,3 +77,6 @@ class ConnectionManager:
                 await ws.send_text(json.dumps(message))
             except Exception as e:
                 print(f"Personal message error for {client_id}: {e}")
+
+
+manager = ConnectionManager()

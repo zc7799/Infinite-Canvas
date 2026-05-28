@@ -67,11 +67,12 @@ from server.data.conversation_store import (
     CONVERSATION_LOCK, conversation_path, list_conversations,
     load_conversation, new_conversation, safe_user_id, user_dir,
 )
-from server.ws.manager import ConnectionManager
+from server.ws.manager import ConnectionManager, manager
 from server.routes.history import router as history_router
 from server.routes.provider import router as provider_router
 from server.routes.runninghub import router as runninghub_router
 from server.routes.conversation import router as conversation_router
+from server.routes.canvas import router as canvas_router
 from server.services.media_service import (
     output_storage, output_url_for, output_path_for, output_file_from_url,
     origin_from_url, now_ms, sanitize_asset_name, sanitize_export_filename,
@@ -168,7 +169,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-manager = ConnectionManager()
 GLOBAL_LOOP = None
 APP_VERSION = "2026.05.19"
 GITHUB_REPO_URL = "https://github.com/hero8152/Infinite-Canvas"
@@ -200,11 +200,11 @@ app.include_router(history_router)
 app.include_router(provider_router)
 app.include_router(runninghub_router)
 app.include_router(conversation_router)
+app.include_router(canvas_router)
 
 # Locks and queue (will be migrated to respective stores)
 QUEUE = []
 QUEUE_LOCK = Lock()
-CANVAS_LOCK = Lock()
 LOAD_LOCK = Lock()
 NEXT_TASK_ID = 1
 UPDATE_LOCK = Lock()
@@ -874,107 +874,6 @@ def get_comfy_history(comfy_address, prompt_id):
 
 
 
-def canvas_path(canvas_id):
-    cleaned = re.sub(r"[^a-zA-Z0-9_-]", "", canvas_id or "")
-    if not cleaned:
-        raise HTTPException(status_code=400, detail="无效的画布 ID")
-    return os.path.join(CANVAS_DIR, f"{cleaned}.json")
-
-def save_canvas(canvas):
-    canvas["updated_at"] = now_ms()
-    with CANVAS_LOCK:
-        with open(canvas_path(canvas["id"]), 'w', encoding='utf-8') as f:
-            json.dump(canvas, f, ensure_ascii=False, indent=2)
-
-def normalize_canvas_kind(kind="classic"):
-    return "smart" if str(kind or "").strip().lower() == "smart" else "classic"
-
-def new_canvas(title="未命名画布", icon="layers", kind="classic"):
-    timestamp = now_ms()
-    canvas_kind = normalize_canvas_kind(kind)
-    canvas = {
-        "id": uuid.uuid4().hex,
-        "title": (title or ("智能画布" if canvas_kind == "smart" else "未命名画布"))[:80],
-        "icon": (icon or ("sparkles" if canvas_kind == "smart" else "🧩"))[:32],
-        "kind": canvas_kind,
-        "created_at": timestamp,
-        "updated_at": timestamp,
-        "nodes": [],
-        "connections": [],
-        "viewport": {"x": 0, "y": 0, "scale": 1},
-    }
-    save_canvas(canvas)
-    return canvas
-
-def load_canvas(canvas_id):
-    path = canvas_path(canvas_id)
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="画布不存在")
-    with open(path, 'r', encoding='utf-8') as f:
-        canvas = json.load(f)
-    if canvas.get("deleted_at"):
-        raise HTTPException(status_code=404, detail="画布已在回收站")
-    return canvas
-
-def load_canvas_any(canvas_id):
-    path = canvas_path(canvas_id)
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="画布不存在")
-    with open(path, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-def canvas_record(data):
-    return {
-        "id": data.get("id"),
-        "title": data.get("title", "未命名画布"),
-        "icon": data.get("icon", "🧩"),
-        "kind": normalize_canvas_kind(data.get("kind")),
-        "created_at": data.get("created_at", 0),
-        "updated_at": data.get("updated_at", 0),
-        "deleted_at": data.get("deleted_at", 0),
-        "node_count": len(data.get("nodes", [])),
-    }
-
-def cleanup_expired_canvas_trash():
-    cutoff = now_ms() - CANVAS_TRASH_RETENTION_MS
-    with CANVAS_LOCK:
-        for filename in os.listdir(CANVAS_DIR):
-            if not filename.endswith(".json"):
-                continue
-            path = os.path.join(CANVAS_DIR, filename)
-            try:
-                with open(path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                deleted_at = int(data.get("deleted_at") or 0)
-                if deleted_at and deleted_at < cutoff:
-                    os.remove(path)
-            except Exception:
-                continue
-
-def iter_canvas_records(include_deleted=False):
-    cleanup_expired_canvas_trash()
-    records = []
-    for filename in os.listdir(CANVAS_DIR):
-        if not filename.endswith(".json"):
-            continue
-        try:
-            with open(os.path.join(CANVAS_DIR, filename), 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except Exception:
-            continue
-        is_deleted = bool(data.get("deleted_at"))
-        if include_deleted != is_deleted:
-            continue
-        records.append(canvas_record(data))
-    return records
-
-def list_canvases():
-    records = iter_canvas_records(include_deleted=False)
-    return sorted(records, key=lambda item: item["updated_at"], reverse=True)
-
-def list_deleted_canvases():
-    records = iter_canvas_records(include_deleted=True)
-    return sorted(records, key=lambda item: item["deleted_at"], reverse=True)
 
 def display_title(text):
     title = re.sub(r"\s+", " ", text or "").strip()
@@ -2749,273 +2648,6 @@ async def canvas_llm(payload: CanvasLLMRequest):
     return {"text": text, "model": model, "raw_usage": raw_data.get("usage")}
 
 # --- 对话管理 ---
-
-# --- 画布管理 ---
-
-@app.get("/api/canvases")
-async def canvases():
-    return {"canvases": list_canvases()}
-
-@app.get("/api/canvases/trash")
-async def trashed_canvases():
-    return {"canvases": list_deleted_canvases(), "retention_days": 30}
-
-@app.post("/api/canvases")
-async def create_canvas(payload: CanvasCreateRequest):
-    return {"canvas": new_canvas(payload.title, payload.icon, payload.kind)}
-
-@app.get("/api/canvases/{canvas_id}/meta")
-async def get_canvas_meta(canvas_id: str):
-    canvas = load_canvas(canvas_id)
-    return {
-        "id": canvas.get("id"),
-        "updated_at": canvas.get("updated_at", 0),
-        "title": canvas.get("title", "未命名画布"),
-        "icon": canvas.get("icon", "layers"),
-        "kind": normalize_canvas_kind(canvas.get("kind")),
-    }
-
-@app.get("/api/canvases/{canvas_id}")
-async def get_canvas(canvas_id: str):
-    return {"canvas": load_canvas(canvas_id)}
-
-@app.post("/api/canvas-assets/check")
-async def check_canvas_assets(payload: CanvasAssetCheckRequest):
-    result = {}
-    for url in payload.urls[:3000]:
-        text = str(url or "").strip()
-        if not text:
-            continue
-        if text.startswith("/output/") or text.startswith("/assets/"):
-            result[text] = bool(output_file_from_url(text))
-        else:
-            result[text] = True
-    return {"exists": result}
-
-@app.post("/api/canvas-assets/download")
-async def download_canvas_assets(payload: CanvasAssetDownloadRequest):
-    buffer = BytesIO()
-    used_names = set()
-    count = 0
-    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        for url in payload.urls[:1000]:
-            text = str(url or "").strip()
-            if not text or not (text.startswith("/output/") or text.startswith("/assets/")):
-                continue
-            path = output_file_from_url(text)
-            if not path or not os.path.isfile(path):
-                continue
-            base = os.path.basename(path) or f"image-{count + 1}.png"
-            name, ext = os.path.splitext(base)
-            archive_name = base
-            suffix = 2
-            while archive_name in used_names:
-                archive_name = f"{name}-{suffix}{ext}"
-                suffix += 1
-            used_names.add(archive_name)
-            zf.write(path, archive_name)
-            count += 1
-    if count <= 0:
-        raise HTTPException(status_code=404, detail="没有可下载的本地图片")
-    buffer.seek(0)
-    filename = re.sub(r'[\\/:*?"<>|]+', "_", payload.filename or "canvas-output-images.zip")
-    if not filename.lower().endswith(".zip"):
-        filename += ".zip"
-    encoded = urllib.parse.quote(filename)
-    headers = {"Content-Disposition": f"attachment; filename*=UTF-8''{encoded}"}
-    return Response(buffer.getvalue(), media_type="application/zip", headers=headers)
-
-def smart_group_export_folder(folder: str, group_name: str) -> str:
-    text = str(folder or "").strip()
-    if text:
-        path = os.path.abspath(os.path.expanduser(text))
-    else:
-        stamp = time.strftime("%Y%m%d-%H%M%S")
-        safe_group = sanitize_export_filename(group_name or "group", "group")
-        path = os.path.abspath(os.path.join(OUTPUT_DIR, "smart-groups", f"{safe_group}-{stamp}"))
-    os.makedirs(path, exist_ok=True)
-    return path
-
-@app.post("/api/smart-canvas/group-export")
-async def export_smart_canvas_group(payload: SmartCanvasGroupExportRequest):
-    target_dir = smart_group_export_folder(payload.folder, payload.group_name)
-    used_names = set()
-    count = 0
-    text_index = 1
-    for item in payload.items[:2000]:
-        kind = str(item.kind or "").lower()
-        if kind == "text":
-            text = str(item.text or "")
-            if not text.strip():
-                continue
-            base = sanitize_export_filename(item.name or f"{text_index}.txt", f"{text_index}.txt")
-            if not base.lower().endswith(".txt"):
-                base += ".txt"
-            text_index += 1
-            name, ext = os.path.splitext(base)
-            out_name = base
-            suffix = 2
-            while out_name in used_names:
-                out_name = f"{name}-{suffix}{ext}"
-                suffix += 1
-            used_names.add(out_name)
-            with open(os.path.join(target_dir, out_name), "w", encoding="utf-8") as f:
-                f.write(text)
-            count += 1
-            continue
-        src = output_file_from_url(item.url)
-        if not src or not os.path.isfile(src):
-            continue
-        base = sanitize_export_filename(item.name or os.path.basename(src), os.path.basename(src) or f"asset-{count + 1}")
-        name, ext = os.path.splitext(base)
-        if not ext:
-            _, src_ext = os.path.splitext(src)
-            ext = src_ext or ".bin"
-            base = name + ext
-        out_name = base
-        suffix = 2
-        while out_name in used_names:
-            out_name = f"{name}-{suffix}{ext}"
-            suffix += 1
-        used_names.add(out_name)
-        shutil.copy2(src, os.path.join(target_dir, out_name))
-        count += 1
-    if count <= 0:
-        raise HTTPException(status_code=404, detail="没有可导出的内容")
-    return {"ok": True, "folder": target_dir, "count": count}
-
-@app.get("/api/asset-library")
-async def get_asset_library():
-    return {"library": load_asset_library()}
-
-@app.post("/api/asset-library/categories")
-async def create_asset_library_category(payload: AssetLibraryCategoryRequest):
-    lib = load_asset_library()
-    cat_type = "workflow" if str(payload.type or "").lower() == "workflow" else "image"
-    category = {"id": f"cat_{uuid.uuid4().hex[:12]}", "name": sanitize_asset_name(payload.name, "新文件夹"), "type": cat_type, "items": []}
-    lib.setdefault("categories", []).append(category)
-    save_asset_library(lib)
-    return {"library": lib, "category": category}
-
-@app.patch("/api/asset-library/categories/{category_id}")
-async def rename_asset_library_category(category_id: str, payload: AssetLibraryRenameRequest):
-    lib = load_asset_library()
-    cat = find_asset_category(lib, category_id)
-    if not cat:
-        raise HTTPException(status_code=404, detail="分类不存在")
-    cat["name"] = sanitize_asset_name(payload.name, cat.get("name") or "新文件夹")
-    save_asset_library(lib)
-    return {"library": lib, "category": cat}
-
-@app.delete("/api/asset-library/categories/{category_id}")
-async def delete_asset_library_category(category_id: str):
-    lib = load_asset_library()
-    cat = find_asset_category(lib, category_id)
-    if not cat:
-        raise HTTPException(status_code=404, detail="分类不存在")
-    if cat.get("type") == "workflow" and category_id == "workflows":
-        raise HTTPException(status_code=400, detail="默认工作流分类不能删除")
-    lib["categories"] = [c for c in lib.get("categories", []) if c.get("id") != category_id]
-    save_asset_library(lib)
-    return {"library": lib}
-
-@app.post("/api/asset-library/items")
-async def add_asset_library_item(payload: AssetLibraryAddRequest):
-    lib = load_asset_library()
-    cat = find_asset_category(lib, payload.category_id)
-    if not cat:
-        raise HTTPException(status_code=404, detail="分类不存在")
-    if cat.get("type") != "image":
-        raise HTTPException(status_code=400, detail="该分类暂不支持添加图片")
-    src = output_file_from_url(payload.url)
-    if not src:
-        raise HTTPException(status_code=400, detail="只支持保存本地 /assets 或 /output 图片")
-    ext = os.path.splitext(src)[1].lower() or ".png"
-    if ext not in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
-        ext = ".png"
-    safe_name = sanitize_asset_name(payload.name or os.path.basename(src), "asset")
-    if not os.path.splitext(safe_name)[1]:
-        safe_name += ext
-    dest_name = f"lib_{uuid.uuid4().hex[:12]}_{safe_name}"
-    dest_path = os.path.join(ASSET_LIBRARY_DIR, dest_name)
-    shutil.copy2(src, dest_path)
-    item = {"id": f"asset_{uuid.uuid4().hex[:12]}", "name": os.path.splitext(safe_name)[0][:120], "url": f"/assets/library/{dest_name}", "created_at": now_ms()}
-    cat.setdefault("items", []).append(item)
-    save_asset_library(lib)
-    return {"library": lib, "item": item}
-
-@app.patch("/api/asset-library/items/{item_id}")
-async def rename_asset_library_item(item_id: str, payload: AssetLibraryRenameRequest):
-    lib = load_asset_library()
-    for cat in lib.get("categories", []):
-        for item in cat.get("items", []):
-            if item.get("id") == item_id:
-                item["name"] = sanitize_asset_name(payload.name, item.get("name") or "asset")
-                save_asset_library(lib)
-                return {"library": lib, "item": item}
-    raise HTTPException(status_code=404, detail="资产不存在")
-
-@app.delete("/api/asset-library/items/{item_id}")
-async def delete_asset_library_item(item_id: str):
-    lib = load_asset_library()
-    removed = None
-    for cat in lib.get("categories", []):
-        keep = []
-        for item in cat.get("items", []):
-            if item.get("id") == item_id:
-                removed = item
-            else:
-                keep.append(item)
-        cat["items"] = keep
-    if not removed:
-        raise HTTPException(status_code=404, detail="资产不存在")
-    save_asset_library(lib)
-    return {"library": lib}
-
-@app.put("/api/canvases/{canvas_id}")
-async def update_canvas(canvas_id: str, payload: CanvasSaveRequest):
-    canvas = load_canvas(canvas_id)
-    current_updated_at = int(canvas.get("updated_at") or 0)
-    if payload.base_updated_at and current_updated_at and int(payload.base_updated_at) < current_updated_at:
-        raise HTTPException(status_code=409, detail={
-            "message": "画布已被其他页面更新，已拒绝旧版本覆盖。",
-            "canvas": canvas,
-            "updated_at": current_updated_at,
-        })
-    canvas["title"] = (payload.title or canvas.get("title") or "未命名画布")[:80]
-    canvas["icon"] = (payload.icon or canvas.get("icon") or "layers")[:32]
-    canvas["kind"] = normalize_canvas_kind(canvas.get("kind"))
-    canvas["nodes"] = payload.nodes
-    canvas["connections"] = payload.connections
-    canvas["viewport"] = payload.viewport
-    canvas["logs"] = payload.logs[-500:]
-    canvas["settings"] = payload.settings or {}
-    save_canvas(canvas)
-    await manager.broadcast_canvas_updated(canvas_id, int(canvas.get("updated_at") or now_ms()), payload.client_id)
-    return {"canvas": canvas}
-
-@app.delete("/api/canvases/{canvas_id}")
-async def delete_canvas(canvas_id: str):
-    canvas = load_canvas_any(canvas_id)
-    if not canvas.get("deleted_at"):
-        canvas["deleted_at"] = now_ms()
-        save_canvas(canvas)
-    return {"ok": True}
-
-@app.post("/api/canvases/{canvas_id}/restore")
-async def restore_canvas(canvas_id: str):
-    canvas = load_canvas_any(canvas_id)
-    if canvas.get("deleted_at"):
-        canvas.pop("deleted_at", None)
-        save_canvas(canvas)
-    return {"canvas": canvas}
-
-@app.delete("/api/canvases/{canvas_id}/purge")
-async def purge_canvas(canvas_id: str):
-    path = canvas_path(canvas_id)
-    if os.path.exists(path):
-        os.remove(path)
-    return {"ok": True}
 
 # --- GPT 对话 ---
 
