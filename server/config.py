@@ -334,6 +334,7 @@ def reload_env_globals():
 
 
 BACKEND_LOCAL_LOAD = {addr: 0 for addr in COMFYUI_INSTANCES}
+LOAD_LOCK = Lock()
 
 
 def update_comfyui_instances(instances):
