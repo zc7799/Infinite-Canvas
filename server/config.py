@@ -335,6 +335,20 @@ def reload_env_globals():
 
 BACKEND_LOCAL_LOAD = {addr: 0 for addr in COMFYUI_INSTANCES}
 
+
+def update_comfyui_instances(instances):
+    """更新 ComfyUI 实例列表（写入 env 并更新模块级全局变量）"""
+    global COMFYUI_INSTANCES, COMFYUI_ADDRESS, BACKEND_LOCAL_LOAD
+    update_env_values({"COMFYUI_INSTANCES": ",".join(instances)})
+    COMFYUI_INSTANCES = instances
+    COMFYUI_ADDRESS = instances[0]
+    new_load = {addr: 0 for addr in instances}
+    for addr, n in (BACKEND_LOCAL_LOAD or {}).items():
+        if addr in new_load:
+            new_load[addr] = n
+    BACKEND_LOCAL_LOAD = new_load
+
+
 # 确保运行时目录存在
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(ASSETS_DIR, exist_ok=True)
