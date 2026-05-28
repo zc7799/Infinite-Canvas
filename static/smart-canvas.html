@@ -16,11 +16,11 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/vendor/js/lucide.js?v=2026.05.28"></script>
-    <script src="/static/js/theme.js?v=2026.05.28"></script>
-    <script src="/static/js/i18n.js?v=2026.05.28"></script>
-    <script src="/static/js/common.js?v=2026.05.28"></script>
-    <link rel="stylesheet" href="/static/css/smart-canvas.css?v=2026.05.28">
+    <script src="/static/vendor/js/lucide.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/theme.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/i18n.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/common.js?v=2026.05.28.160808"></script>
+    <link rel="stylesheet" href="/static/css/smart-canvas.css?v=2026.05.28.160808">
 </head>
 <body>
     <div id="shell" class="shell">
@@ -144,7 +144,7 @@
             </div>
         </div>
         <div id="assetHoverPreview" class="asset-hover-preview">
-            <img alt="asset preview">
+            <img alt="asset preview" loading="lazy">
             <div class="asset-hover-name"></div>
         </div>
         <div id="selectionBox" class="selection-box"></div>
@@ -246,15 +246,15 @@
                     <div class="image-edit-stage-inner">
                         <div id="previewStage" class="preview-stage" style="display:none">
                             <div id="previewFrame" class="preview-frame">
-                                <img id="previewCurrentImage" class="preview-current" alt="current">
+                                <img id="previewCurrentImage" class="preview-current" alt="current" loading="lazy">
                                 <div id="previewCompareLayer" class="preview-compare-layer">
-                                    <img id="previewCompareImage" alt="original">
+                                    <img id="previewCompareImage" alt="original" loading="lazy">
                                 </div>
                                 <div id="previewCompareHandle" class="preview-compare-handle" data-i18n-title="smart.compareDrag" title="拖动对比"></div>
                             </div>
                         </div>
                         <div id="cropCanvas" class="crop-canvas">
-                            <img id="cropImage" alt="crop source">
+                            <img id="cropImage" alt="crop source" loading="lazy">
                             <canvas id="editDrawCanvas" class="edit-draw-canvas"></canvas>
                             <div id="cropBox" class="crop-box">
                                 <div id="cropHandle" class="crop-handle"></div>
@@ -286,8 +286,8 @@
             </div>
         </div>
         <div id="toast" class="toast"></div>
-        <div id="mentionPreview" class="mention-preview"><img alt="preview"></div>
+        <div id="mentionPreview" class="mention-preview"><img alt="preview" loading="lazy"></div>
     </div>
-    <script src="/static/js/smart-canvas.js?v=2026.05.28"></script>
+    <script defer src="/static/js/smart-canvas.js?v=2026.05.28.160808"></script>
 </body>
 </html>

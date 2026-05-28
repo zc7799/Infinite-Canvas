@@ -17,62 +17,29 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=2026.05.28"></script>
-    <script src="/static/vendor/js/lucide.js?v=2026.05.28"></script>
-    <script src="/static/js/theme.js?v=2026.05.28"></script>
-    <script src="/static/js/i18n.js?v=2026.05.28"></script>
-    <script src="/static/js/common.js?v=2026.05.28"></script>
-    <script src="/static/js/image-preview.js?v=2026.05.28"></script>
-    <script src="/static/js/history-bulk-manager.js?v=2026.05.28"></script>
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=2026.05.28.160808"></script>
+    <script src="/static/vendor/js/lucide.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/theme.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/i18n.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/common.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/image-preview.js?v=2026.05.28.160808"></script>
+
     <script type="importmap">
         {
             "imports": {
-                "three": "/static/vendor/js/three-0.160.0.module.js?v=2026.05.28"
+                "three": "/static/vendor/js/three-0.160.0.module.js?v=2026.05.28.160808"
             }
         }
     </script>
+    <link rel="stylesheet" href="/static/css/shared-page.css?v=2026.05.28.160808">
     <style>
-        @import url('/static/vendor/css/fonts.css?v=2026.05.28');
+        @import url('/static/vendor/css/fonts.css?v=2026.05.28.160808');
 
         :root {
             --accent: #111827;
             --bg: #f9fafb;
             --card: #ffffff;
             --easing: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* --- 极简悬浮浅灰滚动条 (无底色/左移) --- */
-        *::-webkit-scrollbar {
-            width: 10px !important;
-            height: 10px !important;
-            background: transparent !important;
-        }
-
-        *::-webkit-scrollbar-track {
-            background: transparent !important;
-            border: none !important;
-        }
-
-        *::-webkit-scrollbar-thumb {
-            background-color: #d8d8d8 !important;
-            border: 3px solid transparent !important;
-            border-right-width: 5px !important;
-            /* 增加右侧间距，使滚动条向左位移 */
-            background-clip: padding-box !important;
-            border-radius: 10px !important;
-        }
-
-        *::-webkit-scrollbar-thumb:hover {
-            background-color: #c0c0c0 !important;
-        }
-
-        *::-webkit-scrollbar-corner {
-            background: transparent !important;
-        }
-
-        * {
-            scrollbar-width: thin !important;
-            scrollbar-color: #d8d8d8 transparent !important;
         }
 
         body {
@@ -89,144 +56,35 @@
             margin-top: 50px;
         }
 
-        /* 统一组件风格 */
-        .glass-btn {
-            background: #111827;
-            transition: all 0.3s var(--easing);
-        }
-
-        .glass-btn:hover {
-            background: #000;
-            transform: translateY(-1px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-        }
-
-        .glass-btn:active {
-            transform: scale(0.98);
-        }
-
-        .upload-item {
-            background: var(--card);
-            border: 1px dashed #e2e8f0;
-            transition: all 0.4s var(--easing);
-        }
-
-        .upload-item:hover {
-            border-color: #000;
-            background: #fff;
-            transform: translateY(-2px);
-        }
-
-        .result-frame {
-            background: #ffffff;
-            border-radius: 32px;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.02);
-        }
-
-        .masonry-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.25rem;
-        }
-
-        @media (min-width: 768px) {
-            .masonry-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        .masonry-item {
-            aspect-ratio: 1 / 1;
-            background: #fff;
-            border: 1px solid #f1f5f9;
-            border-radius: 24px;
-            overflow: hidden;
-            transition: all 0.5s var(--easing);
-            position: relative;
-        }
-
-        .masonry-item:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-        }
-
-        .nano-input {
-            background: #ffffff;
-            border-radius: 16px;
-            transition: all 0.3s ease;
-            border: 1px solid #e5e7eb;
-        }
-
-        .nano-input:focus {
-            background: #ffffff;
-            box-shadow: 0 0 0 2px #000;
-            border-color: transparent;
-        }
-
         @keyframes b-loading {
-            0% {
-                transform: scale(1);
-                background: #000;
-            }
-
-            50% {
-                transform: scale(1.15);
-                background: #444;
-            }
-
-            100% {
-                transform: scale(1);
-                background: #000;
-            }
+            0% { transform: scale(1); background: #000; }
+            50% { transform: scale(1.15); background: #444; }
+            100% { transform: scale(1); background: #000; }
         }
 
         .loading-box {
-            width: 10px;
-            height: 10px;
+            width: 10px; height: 10px;
             animation: b-loading 1s infinite var(--easing);
         }
 
-        /* 复合切换组件样式 - 来自 zimage */
         .mode-switcher {
-            position: relative;
-            background: #f1f1f1;
-            padding: 4px;
-            border-radius: 14px;
-            display: flex;
-            width: 100%;
+            position: relative; background: #f1f1f1; padding: 4px;
+            border-radius: 14px; display: flex; width: 100%;
         }
-
         .mode-btn {
-            position: relative;
-            z-index: 10;
-            flex: 1;
-            padding: 8px 0;
-            text-align: center;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #999;
-            transition: color 0.3s ease;
-            cursor: pointer;
+            position: relative; z-index: 10; flex: 1; padding: 8px 0;
+            text-align: center; font-size: 11px; font-weight: 800;
+            text-transform: uppercase; color: #999; transition: color 0.3s ease; cursor: pointer;
         }
-
-        .mode-btn.active {
-            color: #000;
-        }
-
+        .mode-btn.active { color: #000; }
         .mode-glider {
-            position: absolute;
-            height: calc(100% - 8px);
-            width: calc(50% - 4px);
-            background: #fff;
-            border-radius: 11px;
+            position: absolute; height: calc(100% - 8px); width: calc(50% - 4px);
+            background: #fff; border-radius: 11px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s var(--easing);
-            z-index: 1;
+            transition: transform 0.3s var(--easing); z-index: 1;
         }
     </style>
-    <link rel="stylesheet" href="/static/css/theme.css?v=2026.05.28">
+    <link rel="stylesheet" href="/static/css/theme.css?v=2026.05.28.160808">
 </head>
 
 <body class="selection:bg-black selection:text-white">
@@ -263,7 +121,7 @@
                             <p class="text-[11px] font-bold uppercase tracking-tight" data-i18n="studio.dropImage">Drop image here</p>
                         </div>
 
-                        <img id="previewImg" class="hidden absolute inset-0 w-full h-full object-cover">
+                        <img id="previewImg" class="hidden absolute inset-0 w-full h-full object-cover" loading="lazy">
 
                         <div id="changeOverlay"
                             class="hidden absolute inset-0 bg-black/10 backdrop-blur-sm items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
@@ -439,7 +297,7 @@
 
                         <img id="outputImg"
                             class="hidden w-full h-full object-contain p-8 cursor-zoom-in transition-all duration-700 hover:scale-[1.02]"
-                            onclick="zoomImage()">
+                            onclick="zoomImage()" loading="lazy">
 
                         <a id="downloadBtn" href="#" download
                             class="hidden absolute bottom-8 right-8 w-14 h-14 bg-white shadow-2xl rounded-2xl flex items-center justify-center hover:bg-black hover:text-white transition-all duration-500 border border-gray-100">
@@ -472,7 +330,7 @@
 
         <div class="w-full h-full flex flex-col items-center justify-center" style="max-width:min(1280px, 92vw)">
             <div id="lightboxFrame" class="studio-preview-frame hidden">
-                <img id="lightboxImg" src="" class="studio-preview-img" alt="preview">
+                <img id="lightboxImg" src="" class="studio-preview-img" alt="preview" loading="lazy">
                 <div id="lightboxRes" data-no-pan
                     class="absolute top-4 left-4 bg-black/30 backdrop-blur-md border border-white/20 text-white px-3 py-1.5 rounded-full text-[10px] font-medium tracking-wider opacity-0 transition-opacity duration-300 pointer-events-none z-10">
                 </div>
@@ -942,7 +800,6 @@
             });
 
             const dataUri = await toBase64(uploadedFile);
-            console.log("DataURI generated, length:", dataUri.length);
 
             // Submit task via dedicated Angle endpoint
             // Get Client ID from parent if available

@@ -16,13 +16,13 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=2026.05.28"></script>
-    <script src="/static/vendor/js/lucide.js?v=2026.05.28"></script>
-    <script src="/static/js/theme.js?v=2026.05.28"></script>
-    <script src="/static/js/i18n.js?v=2026.05.28"></script>
-    <script src="/static/js/common.js?v=2026.05.28"></script>
-    <link rel="stylesheet" href="/static/css/canvas.css?v=2026.05.28">
-    <link rel="stylesheet" href="/static/css/theme.css?v=2026.05.28">
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=2026.05.28.160808"></script>
+    <script src="/static/vendor/js/lucide.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/theme.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/i18n.js?v=2026.05.28.160808"></script>
+    <script src="/static/js/common.js?v=2026.05.28.160808"></script>
+    <link rel="stylesheet" href="/static/css/canvas.css?v=2026.05.28.160808">
+    <link rel="stylesheet" href="/static/css/theme.css?v=2026.05.28.160808">
 </head>
 <body>
     <div id="shell" class="shell no-canvas">
@@ -128,15 +128,15 @@
             <div id="outputLightboxShell" class="output-lightbox-shell" onclick="event.stopPropagation()">
             <div id="outputPreview" class="output-preview">
                 <div id="outputCompareContainer" class="output-compare">
-                    <img id="outputCompareResult" alt="result image">
+                    <img id="outputCompareResult" alt="result image" loading="lazy">
                     <div id="outputCompareOriginalWrap" class="output-compare-original-wrap">
-                        <img id="outputCompareOriginal" alt="input image">
+                        <img id="outputCompareOriginal" alt="input image" loading="lazy">
                     </div>
                     <div id="outputCompareSlider" class="output-compare-slider">
                         <div class="output-compare-handle"><i data-lucide="move-horizontal" class="w-4 h-4"></i></div>
                     </div>
                 </div>
-                <img id="outputLightboxImg" class="output-single-img" src="" alt="output preview">
+                <img id="outputLightboxImg" class="output-single-img" src="" alt="output preview" loading="lazy">
                 <video id="outputLightboxVideo" class="output-single-video" src="" controls playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" style="display:none"></video>
                 <div class="output-preview-bar">
                     <div id="outputResolution" class="output-resolution">--</div>
@@ -225,7 +225,7 @@
                 <div id="imageEditStage" class="image-edit-stage">
                     <div class="image-edit-stage-inner">
                         <div id="cropCanvas" class="crop-canvas">
-                            <img id="cropImage" alt="crop source">
+                            <img id="cropImage" alt="crop source" loading="lazy">
                             <canvas id="editDrawCanvas" class="edit-draw-canvas"></canvas>
                             <div id="cropBox" class="crop-box">
                                 <div id="cropHandle" class="crop-handle"></div>
@@ -264,7 +264,7 @@
         </div>
     </div>
 
-    <script src="/static/js/ltx-director-timeline.js?v=2026.05.28"></script>
-    <script src="/static/js/canvas.js?v=2026.05.28"></script>
+    <script defer src="/static/js/ltx-director-timeline.js?v=2026.05.28.160808"></script>
+    <script defer src="/static/js/canvas.js?v=2026.05.28.160808"></script>
 </body>
 </html>
