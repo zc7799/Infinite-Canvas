@@ -8,3 +8,5 @@ python/Scripts/
 .claude/
 .superpowers/
 __pycache__/
+node_modules/
+static/dist/
