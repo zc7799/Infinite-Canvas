@@ -8,6 +8,7 @@ import re
 import urllib.parse
 from typing import Any, Dict, List, Optional
 
+import httpx
 from fastapi import HTTPException
 
 from server.config import (
@@ -637,3 +638,91 @@ def runninghub_normalize_field(raw, fallback=None):
         "imageOrder": int(raw.get("imageOrder") or raw.get("image_order") or fallback.get("imageOrder") or 0),
         "required": bool(raw.get("required", fallback.get("required", False))),
     }
+
+
+# ============================================================
+# 上游模型列表 / 连接测试辅助函数
+# ============================================================
+
+def protocol_from_payload(payload):
+    protocol = str(getattr(payload, "protocol", "") or "openai").strip().lower()
+    return protocol if protocol in SUPPORTED_PROVIDER_PROTOCOLS else "openai"
+
+
+def upstream_models_url(base_url: str, protocol: str):
+    if protocol == "gemini":
+        return f"{base_url}/models" if base_url.endswith("/v1beta") else f"{base_url}/v1beta/models"
+    if protocol == "volcengine":
+        return f"{base_url}/models" if base_url.endswith("/api/v3") else f"{base_url}/api/v3/models"
+    if protocol == "runninghub":
+        return f"{base_url}/openapi/v2/models"
+    return f"{base_url}/models" if base_url.endswith("/v1") else f"{base_url}/v1/models"
+
+
+def upstream_model_headers(api_key: str, protocol: str):
+    if protocol == "gemini":
+        return {"x-goog-api-key": api_key, "Accept": "application/json"}
+    if protocol == "runninghub":
+        return {"Authorization": strip_auth_scheme(api_key, "Bearer"), "Accept": "application/json"}
+    return {"Authorization": bearer_auth_value(api_key), "Accept": "application/json"}
+
+
+def classify_upstream_model(mid):
+    lc = str(mid or "").lower()
+    video_keys = ["veo", "sora", "wan2", "wanx", "doubao-seedance", "doubao-1", "kling", "hailuo", "video", "t2v-", "i2v-", "s2v"]
+    if any(k in lc for k in video_keys):
+        return "video"
+    image_keys = ["banana", "image", "dalle", "dall-e", "imagen", "flux", "stable", "sdxl", "midjourney", "nano-banana", "ideogram", "fal-ai", "z-image", "qwen-image", "klein", "seedream", "doubao-seedream", "text-to-image", "image-to-image"]
+    if any(k in lc for k in image_keys):
+        return "image"
+    return "chat"
+
+
+def parse_upstream_models(raw, protocol="openai"):
+    items = raw.get("data") if isinstance(raw, dict) else None
+    if not items and isinstance(raw, dict):
+        items = raw.get("models") or raw.get("list") or []
+    if not isinstance(items, list):
+        items = []
+    ids = []
+    for it in items:
+        if isinstance(it, str):
+            mid = it
+        elif isinstance(it, dict):
+            mid = it.get("id") or it.get("name") or it.get("model")
+        else:
+            mid = ""
+        if mid:
+            mid = str(mid)
+            if protocol == "gemini" and mid.startswith("models/"):
+                mid = mid[len("models/"):]
+            ids.append(mid)
+    ids = sorted(set(ids))
+    grouped = {"image": [], "chat": [], "video": []}
+    for mid in ids:
+        grouped[classify_upstream_model(mid)].append(mid)
+    return grouped, ids
+
+
+async def fetch_models_from_upstream(base_url: str, api_key: str, protocol: str = "openai"):
+    base_url = (base_url or "").strip().rstrip("/")
+    if not base_url:
+        raise HTTPException(status_code=400, detail="请先填写请求地址")
+    if not re.match(r"^https?://", base_url):
+        raise HTTPException(status_code=400, detail="请求地址必须以 http:// 或 https:// 开头")
+    api_key = (api_key or "").strip()
+    if not api_key:
+        raise HTTPException(status_code=400, detail="请先填写或保存 API Key")
+    protocol = protocol if protocol in SUPPORTED_PROVIDER_PROTOCOLS else "openai"
+    url = upstream_models_url(base_url, protocol)
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.get(url, headers=upstream_model_headers(api_key, protocol))
+            if resp.status_code >= 400:
+                endpoint_label = "/v1beta/models" if protocol == "gemini" else "/api/v3/models" if protocol == "volcengine" else "/openapi/v2/models" if protocol == "runninghub" else "/v1/models"
+                raise HTTPException(status_code=resp.status_code, detail=f"上游 {endpoint_label} 失败：{resp.text[:300]}")
+            raw = resp.json()
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"请求上游模型列表失败：{e}")
+    grouped, ids = parse_upstream_models(raw, protocol)
+    return {"total": len(ids), "image_models": grouped["image"], "chat_models": grouped["chat"], "video_models": grouped["video"], "all": ids}

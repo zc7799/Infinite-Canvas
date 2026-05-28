@@ -40,7 +40,6 @@ from server.config import (
     GLOBAL_CONFIG_FILE, CANVAS_TRASH_RETENTION_MS,
     LOCAL_IMAGE_IMPORT_MAX_BYTES, LOCAL_IMAGE_IMPORT_EXTS,
     RUNNINGHUB_THUMBNAIL_EXTS,
-    PROVIDER_ID_RE, SUPPORTED_PROVIDER_PROTOCOLS,
     RUNNINGHUB_DEFAULT_BASE_URL, RUNNINGHUB_DEFAULT_IMAGE_MODELS,
     RUNNINGHUB_DEFAULT_APPS, RUNNINGHUB_DEFAULT_WORKFLOWS,
     ensure_runtime_config_files, load_env_file,
@@ -59,11 +58,14 @@ from server.config import (
     VIDEO_POLL_TIMEOUT, ONLINE_IMAGE_PROMPT_MAX_LENGTH,
     VIDEO_PROMPT_MAX_LENGTH, LLM_MESSAGE_MAX_LENGTH,
     BACKEND_LOCAL_LOAD,
+    CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS,
+    model_list, update_env_values, reload_env_globals,
 )
 from server.exceptions import AppError, ProviderError, MediaError
 from server.data.history_store import history_store
 from server.ws.manager import ConnectionManager
 from server.routes.history import router as history_router
+from server.routes.provider import router as provider_router
 from server.services.media_service import (
     output_storage, output_url_for, output_path_for, output_file_from_url,
     origin_from_url, now_ms, sanitize_asset_name, sanitize_export_filename,
@@ -98,7 +100,7 @@ from server.services.provider_service import (
     merge_runninghub_provider_with_static, preserve_runninghub_hidden_overrides,
     normalize_endpoint_override, provider_endpoint_url, runninghub_endpoint_url,
     normalize_provider, load_api_providers, save_api_providers, public_provider,
-    get_primary_provider_id, get_api_provider, get_api_provider_exact, env_quote,
+    get_primary_provider_id, get_api_provider, get_api_provider_exact,
     is_apimart_provider, is_gemini_provider, is_volcengine_provider, is_runninghub_provider,
     selected_model, runninghub_provider_with_workflow_store, runninghub_normalize_field,
     load_runninghub_workflow_store, runninghub_workflow_config_has_payload,
@@ -187,6 +189,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str = None):
         await manager.disconnect(websocket, client_id)
 
 app.include_router(history_router)
+app.include_router(provider_router)
 
 # Locks and queue (will be migrated to respective stores)
 QUEUE = []
@@ -228,124 +231,6 @@ async def request_validation_exception_handler(request: Request, exc: RequestVal
         status_code=422,
         content={"detail": friendly_validation_error(exc.errors()), "errors": exc.errors()},
     )
-
-def model_list(env_name, primary, defaults):
-    configured = os.getenv(env_name, "")
-    configured_values = [item.strip() for item in configured.split(",") if item.strip()]
-    values = configured_values or [primary, *defaults]
-    deduped = []
-    for value in values:
-        if value and value not in deduped:
-            deduped.append(value)
-    return deduped
-
-def reload_env_globals():
-    """保存 API 设置后，将 os.environ 里最新的值同步回模块级全局变量，
-    避免保存后需要重启才能生效。"""
-    global MODELSCOPE_API_KEY, AI_API_KEY, AI_BASE_URL
-    global IMAGE_MODELS, CHAT_MODELS, VIDEO_MODELS, MODELSCOPE_CHAT_MODELS
-    MODELSCOPE_API_KEY = os.getenv("MODELSCOPE_API_KEY", "")
-    AI_API_KEY = os.getenv("COMFLY_API_KEY", "")
-    AI_BASE_URL = os.getenv("COMFLY_BASE_URL", "https://ai.comfly.chat").rstrip("/")
-    IMAGE_MODELS = model_list("IMAGE_MODELS", os.getenv("IMAGE_MODEL", IMAGE_MODEL), ["nano-banana-pro"])
-    CHAT_MODELS = model_list("CHAT_MODELS", os.getenv("CHAT_MODEL", CHAT_MODEL), ["gpt-4o-mini", "gemini-3.1-flash-image-preview-2k"])
-    VIDEO_MODELS = model_list("VIDEO_MODELS", "veo3-fast", [
-        "veo2", "veo2-fast", "veo2-pro",
-        "veo3", "veo3-fast", "veo3-pro",
-        "veo3.1", "veo3.1-fast", "veo3.1-quality", "veo3.1-lite",
-        "sora-2", "sora-2-pro",
-        "wan2.6-t2v", "wan2.6-i2v",
-        "wan2.5-t2v-preview", "wan2.5-i2v-preview",
-        "wan2.2-t2v-plus", "wan2.2-i2v-plus", "wan2.2-i2v-flash",
-        "doubao-seedance-2-0-260128",
-        "doubao-seedance-2-0-fast-260128",
-        "doubao-seedance-1-5-pro-251215",
-        "doubao-seedance-1-0-pro-250528",
-        "doubao-seedance-1-0-lite-t2v-250428",
-        "doubao-seedance-1-0-lite-i2v-250428",
-    ])
-    _configured = [m.strip() for m in os.getenv("MODELSCOPE_CHAT_MODELS", "").split(",") if m.strip()]
-    MODELSCOPE_CHAT_MODELS = list(dict.fromkeys([m for m in [*MODELSCOPE_DEFAULT_CHAT_MODELS, *_configured] if m]))
-
-CHAT_MODELS = model_list("CHAT_MODELS", CHAT_MODEL, ["gpt-4o-mini", "gemini-3.1-flash-image-preview-2k"])
-IMAGE_MODELS = model_list("IMAGE_MODELS", IMAGE_MODEL, ["nano-banana-pro"])
-VIDEO_MODELS = model_list("VIDEO_MODELS", "veo3-fast", [
-    # —— Veo 系列 ——
-    "veo2", "veo2-fast", "veo2-pro",
-    "veo3", "veo3-fast", "veo3-pro",
-    "veo3.1", "veo3.1-fast", "veo3.1-quality", "veo3.1-lite",
-    # —— Sora ——
-    "sora-2", "sora-2-pro",
-    # —— 阿里 通义万相 ——
-    "wan2.6-t2v", "wan2.6-i2v",
-    "wan2.5-t2v-preview", "wan2.5-i2v-preview",
-    "wan2.2-t2v-plus", "wan2.2-i2v-plus", "wan2.2-i2v-flash",
-    # —— 火山 豆包 Seedance ——
-    "doubao-seedance-2-0-260128",
-    "doubao-seedance-2-0-fast-260128",
-    "doubao-seedance-1-5-pro-251215",
-    "doubao-seedance-1-0-pro-250528",
-    "doubao-seedance-1-0-lite-t2v-250428",
-    "doubao-seedance-1-0-lite-i2v-250428",
-])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def update_env_values(updates):
-    os.makedirs(os.path.dirname(API_ENV_FILE), exist_ok=True)
-    lines = []
-    if os.path.exists(API_ENV_FILE):
-        with open(API_ENV_FILE, "r", encoding="utf-8-sig") as f:
-            lines = f.read().splitlines()
-    seen = set()
-    next_lines = []
-    for line in lines:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#") or "=" not in line:
-            next_lines.append(line)
-            continue
-        key = line.split("=", 1)[0].strip()
-        if key in updates:
-            next_lines.append(f"{key}={env_quote(updates[key])}")
-            os.environ[key] = str(updates[key] or "")
-            seen.add(key)
-        else:
-            next_lines.append(line)
-    for key, value in updates.items():
-        if key not in seen:
-            next_lines.append(f"{key}={env_quote(value)}")
-            os.environ[key] = str(value or "")
-    with open(API_ENV_FILE, "w", encoding="utf-8") as f:
-        f.write("\n".join(next_lines).rstrip() + "\n")
-
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/output", StaticFiles(directory=OUTPUT_DIR), name="output")
 app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
@@ -3017,276 +2902,6 @@ async def runninghub_upload_asset(payload: RunningHubUploadAssetRequest):
     if isinstance(raw, dict) and raw.get("code") in (0, "0") and isinstance(raw.get("data"), dict) and raw["data"].get("fileName"):
         return {"success": True, "data": {"fileName": raw["data"]["fileName"], "fileType": raw["data"].get("fileType") or content_type}}
     raise HTTPException(status_code=400, detail=(raw.get("msg") if isinstance(raw, dict) else "") or f"RunningHub 上传失败：{raw}")
-
-@app.get("/api/config")
-async def ai_config():
-    preferred_chat_model = next((m for m in CHAT_MODELS if m == "gpt-5.5"), CHAT_MODELS[0] if CHAT_MODELS else CHAT_MODEL)
-    providers = [public_provider(p) for p in load_api_providers()]
-    return {
-        "base_url": AI_BASE_URL,
-        "chat_model": preferred_chat_model,
-        "image_model": IMAGE_MODEL,
-        "chat_models": CHAT_MODELS,
-        "image_models": IMAGE_MODELS,
-        "video_models": VIDEO_MODELS,
-        "comfy_instances": COMFYUI_INSTANCES,
-        "api_providers": providers,
-        "has_api_key": bool(AI_API_KEY),
-        "ms_chat_models": MODELSCOPE_CHAT_MODELS,
-        "has_ms_key": bool(MODELSCOPE_API_KEY),
-    }
-
-@app.get("/api/models")
-async def ai_models():
-    return {"chat_models": CHAT_MODELS, "image_models": IMAGE_MODELS, "video_models": VIDEO_MODELS}
-
-@app.get("/api/providers")
-async def api_providers():
-    return {"providers": [public_provider(p) for p in load_api_providers()]}
-
-@app.put("/api/providers")
-async def save_providers(payload: List[ApiProviderPayload]):
-    providers = []
-    env_updates = {}
-    # 收集每个 item 的 primary 字段
-    raw_primary_flags = [bool(getattr(item, "primary", False)) for item in payload]
-    for item in payload:
-        provider = normalize_provider(item.dict(exclude={"api_key"}))
-        if provider["id"] == "runninghub":
-            provider = preserve_runninghub_hidden_overrides(provider)
-        if any(existing["id"] == provider["id"] for existing in providers):
-            raise HTTPException(status_code=400, detail=f"API 平台 ID 重复：{provider['id']}")
-        providers.append(provider)
-        key_env = provider_key_env(provider["id"])
-        if item.clear_key:
-            env_updates[key_env] = ""
-        elif item.api_key is not None and item.api_key.strip():
-            env_updates[key_env] = item.api_key.strip()
-        if provider["id"] == "runninghub":
-            wallet_env = runninghub_wallet_key_env()
-            if item.clear_wallet_key:
-                env_updates[wallet_env] = ""
-            elif item.wallet_api_key is not None and item.wallet_api_key.strip():
-                env_updates[wallet_env] = item.wallet_api_key.strip()
-        if provider["id"] == "comfly":
-            env_updates["COMFLY_BASE_URL"] = provider["base_url"]
-            env_updates["IMAGE_MODELS"] = ",".join(provider["image_models"])
-            env_updates["CHAT_MODELS"] = ",".join(provider["chat_models"])
-            env_updates["VIDEO_MODELS"] = ",".join(provider.get("video_models") or [])
-        if provider["id"] == "modelscope":
-            env_updates["MODELSCOPE_CHAT_MODELS"] = ",".join(provider["chat_models"])
-        if provider["id"] == "runninghub":
-            provider["protocol"] = "runninghub"
-    if not providers:
-        raise HTTPException(status_code=400, detail="至少保留一个 API 平台")
-    # 强制最多一个 primary（取最后被标记的；都没标记则保持原样不强制）
-    primary_indices = [i for i, flag in enumerate(raw_primary_flags) if flag]
-    if primary_indices:
-        winner = primary_indices[-1]
-        for i, p in enumerate(providers):
-            p["primary"] = (i == winner)
-    save_api_providers(providers)
-    if env_updates:
-        update_env_values(env_updates)
-        reload_env_globals()   # 立即将最新 env 值同步回模块全局变量，无需重启
-    return {"providers": [public_provider(p) for p in providers]}
-
-# --- ModelScope Token (从 env 读取，不再支持通过 UI 修改) ---
-
-@app.get("/api/config/token")
-async def get_global_token():
-    # 优先读 env，回退到 global_config.json（兼容旧数据）
-    if MODELSCOPE_API_KEY:
-        return {"token": MODELSCOPE_API_KEY}
-    if os.path.exists(GLOBAL_CONFIG_FILE):
-        try:
-            with open(GLOBAL_CONFIG_FILE, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                return {"token": config.get("modelscope_token", "")}
-        except:
-            pass
-    return {"token": ""}
-
-# --- 在线生图 (COMFLY) ---
-
-def protocol_from_payload(payload):
-    protocol = str(getattr(payload, "protocol", "") or "openai").strip().lower()
-    return protocol if protocol in SUPPORTED_PROVIDER_PROTOCOLS else "openai"
-
-def upstream_models_url(base_url: str, protocol: str):
-    if protocol == "gemini":
-        return f"{base_url}/models" if base_url.endswith("/v1beta") else f"{base_url}/v1beta/models"
-    if protocol == "volcengine":
-        return f"{base_url}/models" if base_url.endswith("/api/v3") else f"{base_url}/api/v3/models"
-    if protocol == "runninghub":
-        return f"{base_url}/openapi/v2/models"
-    return f"{base_url}/models" if base_url.endswith("/v1") else f"{base_url}/v1/models"
-
-def upstream_model_headers(api_key: str, protocol: str):
-    if protocol == "gemini":
-        return {"x-goog-api-key": api_key, "Accept": "application/json"}
-    if protocol == "runninghub":
-        return {"Authorization": strip_auth_scheme(api_key, "Bearer"), "Accept": "application/json"}
-    return {"Authorization": bearer_auth_value(api_key), "Accept": "application/json"}
-
-def classify_upstream_model(mid):
-    lc = str(mid or "").lower()
-    video_keys = ["veo", "sora", "wan2", "wanx", "doubao-seedance", "doubao-1", "kling", "hailuo", "video", "t2v-", "i2v-", "s2v"]
-    if any(k in lc for k in video_keys):
-        return "video"
-    image_keys = ["banana", "image", "dalle", "dall-e", "imagen", "flux", "stable", "sdxl", "midjourney", "nano-banana", "ideogram", "fal-ai", "z-image", "qwen-image", "klein", "seedream", "doubao-seedream", "text-to-image", "image-to-image"]
-    if any(k in lc for k in image_keys):
-        return "image"
-    return "chat"
-
-def parse_upstream_models(raw, protocol="openai"):
-    items = raw.get("data") if isinstance(raw, dict) else None
-    if not items and isinstance(raw, dict):
-        items = raw.get("models") or raw.get("list") or []
-    if not isinstance(items, list):
-        items = []
-    ids = []
-    for it in items:
-        if isinstance(it, str):
-            mid = it
-        elif isinstance(it, dict):
-            mid = it.get("id") or it.get("name") or it.get("model")
-        else:
-            mid = ""
-        if mid:
-            mid = str(mid)
-            if protocol == "gemini" and mid.startswith("models/"):
-                mid = mid[len("models/"):]
-            ids.append(mid)
-    ids = sorted(set(ids))
-    grouped = {"image": [], "chat": [], "video": []}
-    for mid in ids:
-        grouped[classify_upstream_model(mid)].append(mid)
-    return grouped, ids
-
-@app.post("/api/providers/test-connection")
-async def test_provider_connection(payload: TestConnectionPayload):
-    """测试请求地址是否可用：调上游 /v1/models。验证通过时同时把模型清单按类别返回，避免再调一次拉取接口。"""
-    base_url = (payload.base_url or "").strip().rstrip("/")
-    if not base_url:
-        raise HTTPException(status_code=400, detail="请先填写请求地址")
-    if not re.match(r"^https?://", base_url):
-        raise HTTPException(status_code=400, detail="请求地址必须以 http:// 或 https:// 开头")
-    api_key = (payload.api_key or "").strip()
-    if not api_key and payload.provider_id:
-        api_key = os.getenv(runninghub_wallet_key_env(), "") if payload.provider_id == "runninghub" else ""
-        if not api_key:
-            api_key = os.getenv(provider_key_env(payload.provider_id), "")
-    if not api_key:
-        raise HTTPException(status_code=400, detail="请先填写或保存 API Key")
-    protocol = protocol_from_payload(payload)
-    url = upstream_models_url(base_url, protocol)
-    try:
-        async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.get(url, headers=upstream_model_headers(api_key, protocol))
-        if resp.status_code >= 400:
-            return {"ok": False, "status": resp.status_code, "message": resp.text[:300]}
-        data = resp.json() if resp.text else {}
-        grouped, ids = parse_upstream_models(data, protocol)
-        return {"ok": True, "status": resp.status_code, "model_count": len(ids), "image_models": grouped["image"], "chat_models": grouped["chat"], "video_models": grouped["video"], "all": ids}
-    except httpx.HTTPError as e:
-        return {"ok": False, "status": 0, "message": str(e)[:300]}
-
-@app.post("/api/providers/probe-async")
-async def probe_async_endpoint(payload: TestConnectionPayload):
-    """验证异步协议：用假 task_id 请求 GET /v1/tasks/{fake_id}。
-    收到 400 Invalid task ID = 端点存在且 Key 有效；401/403 = Key 无效；404/连接失败 = 不支持异步端点。"""
-    base_url = (payload.base_url or "").strip().rstrip("/")
-    if not base_url:
-        raise HTTPException(status_code=400, detail="请先填写请求地址")
-    api_key = (payload.api_key or "").strip()
-    if not api_key and payload.provider_id:
-        api_key = os.getenv(runninghub_wallet_key_env(), "") if payload.provider_id == "runninghub" else ""
-        if not api_key:
-            api_key = os.getenv(provider_key_env(payload.provider_id), "")
-    if not api_key:
-        raise HTTPException(status_code=400, detail="请先填写或保存 API Key")
-    tasks_base = base_url if base_url.endswith("/v1") else f"{base_url}/v1"
-    probe_url = f"{tasks_base}/tasks/healthcheck_probe_do_not_submit"
-    try:
-        async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.get(probe_url, headers={"Authorization": bearer_auth_value(api_key), "Accept": "application/json"})
-        try:
-            body = resp.json()
-        except Exception:
-            body = resp.text[:500]
-        sc = resp.status_code
-        # 判断结果
-        err_msg = ""
-        if isinstance(body, dict):
-            err = body.get("error") or {}
-            if isinstance(err, dict):
-                err_msg = str(err.get("message") or "").lower()
-            else:
-                err_msg = str(err).lower()
-        # 400 + "invalid task id" → 端点存在，Key 有效
-        if sc == 400 and "invalid task id" in err_msg:
-            return {"ok": True, "status_code": sc, "message": "异步任务端点可用，API Key 已通过认证", "raw": body}
-        # 401 / 403 → Key 无效
-        if sc in (401, 403):
-            return {"ok": False, "status_code": sc, "message": "API Key 无效或无权限", "raw": body}
-        # 404 + 没有结构化错误 → 平台不支持此端点
-        if sc == 404:
-            return {"ok": False, "status_code": sc, "message": "平台不支持 /v1/tasks/ 端点，可能不是 APIMart 异步协议", "raw": body}
-        # 其他 400 系 → 返回原始信息供参考
-        if 400 <= sc < 500:
-            return {"ok": None, "status_code": sc, "message": f"端点返回 {sc}，请查看原始响应判断", "raw": body}
-        # 2xx → 意外成功（不太可能）
-        if sc < 300:
-            return {"ok": True, "status_code": sc, "message": f"端点返回 {sc}（意外成功）", "raw": body}
-        return {"ok": False, "status_code": sc, "message": f"服务端错误 {sc}", "raw": body}
-    except httpx.HTTPError as e:
-        raise HTTPException(status_code=502, detail=str(e)[:300])
-
-async def fetch_models_from_upstream(base_url: str, api_key: str, protocol: str = "openai"):
-    """从上游模型列表端点拉取模型，并按名称做轻量分类。"""
-    base_url = (base_url or "").strip().rstrip("/")
-    if not base_url:
-        raise HTTPException(status_code=400, detail="请先填写请求地址")
-    if not re.match(r"^https?://", base_url):
-        raise HTTPException(status_code=400, detail="请求地址必须以 http:// 或 https:// 开头")
-    api_key = (api_key or "").strip()
-    if not api_key:
-        raise HTTPException(status_code=400, detail="请先填写或保存 API Key")
-    protocol = protocol if protocol in SUPPORTED_PROVIDER_PROTOCOLS else "openai"
-    url = upstream_models_url(base_url, protocol)
-    try:
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.get(url, headers=upstream_model_headers(api_key, protocol))
-            if resp.status_code >= 400:
-                endpoint_label = "/v1beta/models" if protocol == "gemini" else "/api/v3/models" if protocol == "volcengine" else "/openapi/v2/models" if protocol == "runninghub" else "/v1/models"
-                raise HTTPException(status_code=resp.status_code, detail=f"上游 {endpoint_label} 失败：{resp.text[:300]}")
-            raw = resp.json()
-    except httpx.HTTPError as e:
-        raise HTTPException(status_code=502, detail=f"请求上游模型列表失败：{e}")
-    grouped, ids = parse_upstream_models(raw, protocol)
-    return {"total": len(ids), "image_models": grouped["image"], "chat_models": grouped["chat"], "video_models": grouped["video"], "all": ids}
-
-@app.post("/api/providers/fetch-models")
-async def fetch_upstream_models_from_payload(payload: TestConnectionPayload):
-    """按页面当前表单值拉取模型，支持新增平台未保存时直接使用临时 Base URL / Key。"""
-    api_key = (payload.api_key or "").strip()
-    if not api_key and payload.provider_id:
-        api_key = os.getenv(runninghub_wallet_key_env(), "") if payload.provider_id == "runninghub" else ""
-        if not api_key:
-            api_key = os.getenv(provider_key_env(payload.provider_id), "")
-    return await fetch_models_from_upstream(payload.base_url, api_key, protocol_from_payload(payload))
-
-@app.get("/api/providers/{provider_id}/fetch-models")
-async def fetch_upstream_models(provider_id: str):
-    """从已保存的上游 OpenAI 兼容接口拉取 /v1/models 列表，按名称智能分类为 image/chat/video。"""
-    provider = get_api_provider_exact(provider_id)
-    api_key = os.getenv(runninghub_wallet_key_env(), "") if provider["id"] == "runninghub" else ""
-    if not api_key:
-        api_key = os.getenv(provider_key_env(provider["id"]), "")
-    if not api_key:
-        raise HTTPException(status_code=400, detail=f"{provider.get('name') or provider_id} 未配置 API Key")
-    return await fetch_models_from_upstream(provider.get("base_url") or "", api_key, provider_protocol(provider))
 
 async def build_online_image_result(payload: OnlineImageRequest):
     provider = get_api_provider(payload.provider_id)
