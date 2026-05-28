@@ -26,7 +26,7 @@ class ApiProviderPayload(BaseModel):
 
 
 class TestConnectionPayload(BaseModel):
-    id: str = ""
+    provider_id: str = ""
     base_url: str = ""
     protocol: str = "openai"
     image_generation_endpoint: str = ""

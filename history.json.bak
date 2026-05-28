@@ -1,0 +1,1435 @@
+[
+  {
+    "prompt": "一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位年轻的韩国女性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：长发、蓬松的黑发，微乱，在所有帧中保持一致（自然松散的垂落，轻微的动感）。服装：连贯的韩国偶像摄影造型 — 白色衬衫 + 短款下装（或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_04a91c99a9.png"
+    ],
+    "timestamp": 1779965334.4189284,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "custom-api-2",
+    "provider_name": "apiqik",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "custom-api-2",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "n": 1,
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_8a5283ffe441.jpg",
+          "name": "微信图片_20260521103335_484_35.jpg",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": {
+      "input_tokens": 2069,
+      "input_tokens_details": {
+        "image_tokens": 1452,
+        "text_tokens": 617
+      },
+      "output_tokens": 7024,
+      "output_tokens_details": {
+        "image_tokens": 7024,
+        "text_tokens": 0
+      },
+      "total_tokens": 9093
+    }
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位男性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：短发、黑发，微乱，在所有帧中保持一致。服装：连贯的韩国偶像摄影造型 — 痞帅的西装，白色衬衫 （或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_424b21d51e.png"
+    ],
+    "timestamp": 1779964447.0698435,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "custom-api-2",
+    "provider_name": "apiqik",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "custom-api-2",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "n": 1,
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_1a35c7010114.jpg",
+          "name": "400e9b265abe54e2d4ef167954b9f203_ai_ref_30b37beb81b1.jpg",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": {
+      "input_tokens": 1804,
+      "input_tokens_details": {
+        "image_tokens": 1200,
+        "text_tokens": 604
+      },
+      "output_tokens": 3122,
+      "output_tokens_details": {
+        "image_tokens": 3122,
+        "text_tokens": 0
+      },
+      "total_tokens": 4926
+    }
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位男性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：短发、黑发，微乱，在所有帧中保持一致。服装：连贯的韩国偶像摄影造型 — 痞帅的西装，白色衬衫 （或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_4f6a52ffac.png"
+    ],
+    "timestamp": 1779960589.7105234,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KSPYEA2Y078J9G21YDMKNM7F",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "n": 1,
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_1a35c7010114.jpg",
+          "name": "400e9b265abe54e2d4ef167954b9f203_ai_ref_30b37beb81b1.jpg",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位男性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：短发、黑发，微乱，在所有帧中保持一致。服装：连贯的韩国偶像摄影造型 — 痞帅的西装，白色衬衫 （或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_f0d1b792d5.png"
+    ],
+    "timestamp": 1779958713.720385,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "custom-api",
+    "provider_name": "汇取云",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "custom-api",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "n": 1,
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_1a35c7010114.jpg",
+          "name": "400e9b265abe54e2d4ef167954b9f203_ai_ref_30b37beb81b1.jpg",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位男性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：短发、黑发，微乱，在所有帧中保持一致。服装：连贯的韩国偶像摄影造型 — 痞帅的西装，白色衬衫 （或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_abeb4855af.png"
+    ],
+    "timestamp": 1779957324.663129,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KSPVFB52EDVP0GTP5Z3548XB",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "n": 1,
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_1a35c7010114.jpg",
+          "name": "400e9b265abe54e2d4ef167954b9f203_ai_ref_30b37beb81b1.jpg",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位男性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：短发、黑发，微乱，在所有帧中保持一致。服装：连贯的韩国偶像摄影造型 — 痞帅的西装，白色衬衫 （或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_0fdbb75fb6.png"
+    ],
+    "timestamp": 1779957322.6287394,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KSPVFHTWJ5CM96TVSBPGPCJK",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "n": 1,
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_1a35c7010114.jpg",
+          "name": "400e9b265abe54e2d4ef167954b9f203_ai_ref_30b37beb81b1.jpg",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779945001_1b05b55078.png"
+    ],
+    "videos": [],
+    "audios": [],
+    "texts": [],
+    "files": [],
+    "items": [
+      {
+        "url": "/assets/output/workflow-custom_1779945001_1b05b55078.png",
+        "kind": "image",
+        "name": "120155_OG_00021_.png",
+        "node_id": "886",
+        "output_key": "images"
+      }
+    ],
+    "outputs": [
+      "/assets/output/workflow-custom_1779945001_1b05b55078.png"
+    ],
+    "seed": 816188854655177,
+    "timestamp": 1779945001.069985,
+    "type": "workflow-custom",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 1,
+    "prompt_id": "a329379d-159e-40b1-a2fe-dad9b8e32dd2",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 1277308744112764
+      },
+      "1109": {
+        "value": "21"
+      },
+      "1118": {
+        "image": "ai_ref_a3007662bbab.png"
+      }
+    }
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779889041_4939ed1407.png"
+    ],
+    "videos": [],
+    "audios": [],
+    "texts": [],
+    "files": [],
+    "items": [
+      {
+        "url": "/assets/output/workflow-custom_1779889041_4939ed1407.png",
+        "kind": "image",
+        "name": "120155_OG_00020_.png",
+        "node_id": "886",
+        "output_key": "images"
+      }
+    ],
+    "outputs": [
+      "/assets/output/workflow-custom_1779889041_4939ed1407.png"
+    ],
+    "seed": 889451535735856,
+    "timestamp": 1779889041.315938,
+    "type": "workflow-custom",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 1,
+    "prompt_id": "6c7277da-81ac-4e67-a07d-7ab38cf24fef",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 253247539655940
+      },
+      "1109": {
+        "value": "21"
+      },
+      "1118": {
+        "image": "ai_ref_a3007662bbab.png"
+      }
+    }
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779882247_d65527a81e.png"
+    ],
+    "videos": [],
+    "audios": [],
+    "texts": [],
+    "files": [],
+    "items": [
+      {
+        "url": "/assets/output/workflow-custom_1779882247_d65527a81e.png",
+        "kind": "image",
+        "name": "120155_OG_00019_.png",
+        "node_id": "886",
+        "output_key": "images"
+      }
+    ],
+    "outputs": [
+      "/assets/output/workflow-custom_1779882247_d65527a81e.png"
+    ],
+    "seed": 322183620189575,
+    "timestamp": 1779882247.8648517,
+    "type": "workflow-custom",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 7,
+    "prompt_id": "dfb5c9ab-49f1-47b3-9ff8-89fcdee7f5c8",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 651049377454255
+      },
+      "1109": {
+        "value": "21"
+      },
+      "1118": {
+        "image": "ai_ref_a3007662bbab.png"
+      }
+    }
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779882214_fc5c657e9c.png"
+    ],
+    "videos": [],
+    "audios": [],
+    "texts": [],
+    "files": [],
+    "items": [
+      {
+        "url": "/assets/output/workflow-custom_1779882214_fc5c657e9c.png",
+        "kind": "image",
+        "name": "110556_OG_00010_.png",
+        "node_id": "886",
+        "output_key": "images"
+      }
+    ],
+    "outputs": [
+      "/assets/output/workflow-custom_1779882214_fc5c657e9c.png"
+    ],
+    "seed": 412922332238037,
+    "timestamp": 1779882214.9467998,
+    "type": "workflow-custom",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 6,
+    "prompt_id": "556677ff-a2b1-44ba-bcdd-c0b3c4ad0313",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 1072981476071857
+      },
+      "1150": {
+        "value": "21"
+      },
+      "1158": {
+        "value": "21"
+      },
+      "1160": {
+        "image": "ai_ref_cffa95d887ea.png"
+      }
+    }
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779882113_b45f026bac.png"
+    ],
+    "videos": [],
+    "audios": [],
+    "texts": [],
+    "files": [],
+    "items": [
+      {
+        "url": "/assets/output/workflow-custom_1779882113_b45f026bac.png",
+        "kind": "image",
+        "name": "110556_OG_00009_.png",
+        "node_id": "886",
+        "output_key": "images"
+      }
+    ],
+    "outputs": [
+      "/assets/output/workflow-custom_1779882113_b45f026bac.png"
+    ],
+    "seed": 606035986594768,
+    "timestamp": 1779882113.028099,
+    "type": "workflow-custom",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 5,
+    "prompt_id": "aa60681a-dbfa-4660-89e9-c08a12d12f6b",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 1384639903767378
+      },
+      "1150": {
+        "value": "21"
+      },
+      "1158": {
+        "value": "21"
+      },
+      "1160": {
+        "image": "ai_ref_51aeadf2f3fd.png"
+      }
+    }
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779882089_b85fc77c27.png"
+    ],
+    "videos": [],
+    "audios": [],
+    "texts": [],
+    "files": [],
+    "items": [
+      {
+        "url": "/assets/output/workflow-custom_1779882089_b85fc77c27.png",
+        "kind": "image",
+        "name": "110556_OG_00008_.png",
+        "node_id": "886",
+        "output_key": "images"
+      }
+    ],
+    "outputs": [
+      "/assets/output/workflow-custom_1779882089_b85fc77c27.png"
+    ],
+    "seed": 8425535069999,
+    "timestamp": 1779882089.2917771,
+    "type": "workflow-custom",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 4,
+    "prompt_id": "eebd2aca-2165-4dd1-8628-b03bc92a21c7",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 1302284908019328
+      },
+      "1150": {
+        "value": "21"
+      },
+      "1158": {
+        "value": "21"
+      },
+      "1160": {
+        "image": "ai_ref_51aeadf2f3fd.png"
+      }
+    }
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779882070_f9601d7042.png"
+    ],
+    "videos": [],
+    "audios": [],
+    "texts": [],
+    "files": [],
+    "items": [
+      {
+        "url": "/assets/output/workflow-custom_1779882070_f9601d7042.png",
+        "kind": "image",
+        "name": "110556_OG_00007_.png",
+        "node_id": "886",
+        "output_key": "images"
+      }
+    ],
+    "outputs": [
+      "/assets/output/workflow-custom_1779882070_f9601d7042.png"
+    ],
+    "seed": 828593884047930,
+    "timestamp": 1779882070.6992028,
+    "type": "workflow-custom",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 3,
+    "prompt_id": "e54f0c3c-2873-48a9-8af8-3d3cbef1f4f9",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 209477863786055
+      },
+      "1150": {
+        "value": "21"
+      },
+      "1158": {
+        "value": "21"
+      },
+      "1160": {
+        "image": "ai_ref_51aeadf2f3fd.png"
+      }
+    }
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779652145_bb179155bf.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-custom_1779652145_bb179155bf.png"
+    ],
+    "seed": 141699152897294,
+    "timestamp": 1779652145.530391,
+    "type": "workflow-custom",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 2,
+    "prompt_id": "fe38290b-78e7-41ac-8e61-da236f098a0a",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 342086019710158
+      },
+      "1150": {
+        "value": "21"
+      },
+      "1158": {
+        "value": "21"
+      },
+      "1160": {
+        "image": "ai_ref_51aeadf2f3fd.png"
+      }
+    }
+  },
+  {
+    "prompt": "21",
+    "images": [
+      "/assets/output/workflow-custom_1779652114_ffccbcaeba.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-custom_1779652114_ffccbcaeba.png"
+    ],
+    "seed": 616158017351299,
+    "timestamp": 1779652114.3701935,
+    "type": "workflow-custom",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 1,
+    "prompt_id": "794d891e-24e0-4b8e-8402-865dff380fce",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 593613184638158
+      },
+      "1150": {
+        "value": "21"
+      },
+      "1158": {
+        "value": "21"
+      },
+      "1160": {
+        "image": "ai_ref_51aeadf2f3fd.png"
+      }
+    }
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779592272_255e9a1291.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779592272_255e9a1291.png"
+    ],
+    "seed": 191869159288452,
+    "timestamp": 1779592272.2012804,
+    "type": "workflow-test",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 4,
+    "prompt_id": "06c65834-5d21-453d-beae-7a220536b417",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1160": {
+        "image": "PixPin_2026-05-24_11-08-15.png"
+      },
+      "1158": {
+        "value": "一个男人搂着女人的腰，男人的一只手四肢并拢放在女人胯部底端"
+      },
+      "1150": {
+        "value": "不要跪在床中央，不要双腿在床上，不要背对镜头，女人不要侧身背影，女人不要站立，不要盘腿，不要完全躺平，不要时尚摆拍，不要夸张模特姿势，不要远景，不要隐藏面部，不要脸部被遮挡"
+      },
+      "832": {
+        "seed": 105897727920186
+      }
+    }
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779592199_6aed356743.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779592199_6aed356743.png"
+    ],
+    "seed": 118737472795405,
+    "timestamp": 1779592199.3993526,
+    "type": "workflow-test",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 3,
+    "prompt_id": "e715c065-6535-4508-b61b-d8595c08d72e",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1160": {
+        "image": "PixPin_2026-05-24_11-08-15.png"
+      },
+      "1158": {
+        "value": "女人裸体"
+      },
+      "1150": {
+        "value": "不要跪在床中央，不要双腿在床上，不要背对镜头，女人不要侧身背影，女人不要站立，不要盘腿，不要完全躺平，不要时尚摆拍，不要夸张模特姿势，不要远景，不要隐藏面部，不要脸部被遮挡"
+      },
+      "832": {
+        "seed": 821042116458759
+      }
+    }
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779592172_c6bdb98039.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779592172_c6bdb98039.png"
+    ],
+    "seed": 696986913890515,
+    "timestamp": 1779592172.357333,
+    "type": "workflow-test",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 2,
+    "prompt_id": "3df2a48d-9266-47ae-8337-3fd2179419ed",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1160": {
+        "image": "PixPin_2026-05-24_11-08-15.png"
+      },
+      "1158": {
+        "value": "女人裸体"
+      },
+      "1150": {
+        "value": "不要跪在床中央，不要双腿在床上，不要背对镜头，女人不要侧身背影，女人不要站立，不要盘腿，不要完全躺平，不要时尚摆拍，不要夸张模特姿势，不要远景，不要隐藏面部，不要脸部被遮挡"
+      },
+      "832": {
+        "seed": 1156201823608013
+      }
+    }
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779592132_a1d44a9975.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779592132_a1d44a9975.png"
+    ],
+    "seed": 404741003676507,
+    "timestamp": 1779592132.2136862,
+    "type": "workflow-test",
+    "workflow_json": "custom/2511双图-两张同人输入.json",
+    "task_id": 1,
+    "prompt_id": "9254a9a7-328e-4a16-b736-268c2fb6b0b9",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1160": {
+        "image": "PixPin_2026-05-24_11-08-15.png"
+      },
+      "1158": {
+        "value": "女人裸体"
+      },
+      "1150": {
+        "value": "不要跪在床中央，不要双腿在床上，不要背对镜头，女人不要侧身背影，女人不要站立，不要盘腿，不要完全躺平，不要时尚摆拍，不要夸张模特姿势，不要远景，不要隐藏面部，不要脸部被遮挡"
+      },
+      "832": {
+        "seed": 1086576597712117
+      }
+    }
+  },
+  {
+    "prompt": "角色设定图布局，聚焦于一位年幼的女性街舞舞者，保持和图1的人物一致性。包含4个大型、高细节度的全身动态舞姿（突出舞蹈动作，面部清晰）。侧边附一条清晰的多角度参考条，仅含3个精细头部特写（正面、侧面、3/4侧面）。最大限度减少文字元素，将像素空间优先用于面部细节刻画。背景为粗砺工业风，搭配写实光影效果",
+    "images": [
+      "/assets/output/online_86a4b8f939.png"
+    ],
+    "timestamp": 1779511376.3889313,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS9J68TJ995VXEGSJB46BE9W",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_7fb9e194dd93.png",
+          "name": "PixPin_2026-05-23_12-40-13.png",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位男性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：短发、黑发，微乱，在所有帧中保持一致。服装：连贯的韩国偶像摄影造型 — 痞帅的西装，白色衬衫 （或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_2e354f73b4.png"
+    ],
+    "timestamp": 1779510580.2575142,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS9HENS5MSAGWG9FRDQY80KW",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "864x1536",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_1a35c7010114.jpg",
+          "name": "400e9b265abe54e2d4ef167954b9f203_ai_ref_30b37beb81b1.jpg",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列偶像肖像摄影。每一帧都呈现同一位年轻的女性，保持和图1的人物一致性，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：长发、蓬松的黑发，微乱，在所有帧中保持一致（自然松散的垂落，轻微的动感）。服装：连贯的韩国偶像摄影造型 — 白色衬衫 + 短款下装（或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_36cb52d414.png"
+    ],
+    "timestamp": 1779510400.0630832,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS9H9QP5MQMRBSD3GQ6M661N",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "864x1536",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_01086c67313b.png",
+          "name": "PixPin_2026-05-23_12-19-34.png",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列偶像肖像摄影。每一帧都呈现同一位年轻的女性，保持和图1的人物一致性，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：长发、蓬松的黑发，微乱，在所有帧中保持一致（自然松散的垂落，轻微的动感）。服装：连贯的韩国偶像摄影造型 — 白色衬衫 + 短款下装（或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_1b5b6cf40b.png"
+    ],
+    "timestamp": 1779510349.1289303,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS9H5HXEJ109WJQ8RNYNVM24",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "1152x2048",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_01086c67313b.png",
+          "name": "PixPin_2026-05-23_12-19-34.png",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位年轻的女性，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：长发、蓬松的黑发，微乱，在所有帧中保持一致（自然松散的垂落，轻微的动感）。服装：连贯的韩国偶像摄影造型 — 白色衬衫 + 短款下装（或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_73e4543d12.png"
+    ],
+    "timestamp": 1779510094.7442124,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS9H0QW45YVKSWTMCQDGXZSA",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "864x1536",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_01086c67313b.png",
+          "name": "PixPin_2026-05-23_12-19-34.png",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位年轻的韩国女性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：长发、蓬松的黑发，微乱，在所有帧中保持一致（自然松散的垂落，轻微的动感）。服装：连贯的韩国偶像摄影造型 — 白色衬衫 + 短款下装（或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_e144bf3633.png"
+    ],
+    "timestamp": 1779509938.1423278,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS9GVF9DPR3YVGZDK7N5HXQP",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "864x1536",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_e1e0847d2168.png",
+          "name": "PixPin_2026-05-23_12-16-43.png",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "9:16 竖版 — 一个 3x3 网格拼贴（九张图片）形成一系列韩国偶像肖像摄影。每一帧都呈现同一位男性偶像，在所有九张镜头中保持 100% 一致的面部特征、比例、发型和身份。自然、超逼真的皮肤纹理，无修图，无磨皮。干净的偶像风格极简妆容，柔和的光泽，微妙的瑕疵。发型：短发、黑发，微乱，在所有帧中保持一致。服装：连贯的韩国偶像摄影造型 — 痞帅的西装，白色衬衫 （或简单的中性色调服装），青春、干净、略带休闲但有造型感。所有帧中穿着相同的服装。场景：极简的工作室或简单的室内环境（白墙，柔和的窗光，干净的背景）。聚焦于主体，而不是环境。光照：柔和漫反射的自然光，温柔的高光，低对比度，略带通透感的色调，微妙的胶片般柔和感。相机风格：亲密的肖像摄影，略带手持感，微妙的瑕疵（轻微的颗粒感，动态帧中的轻微模糊，不完美的构图）。帧分解（3x3 网格）：顶行：- 左上：自然站立，视线略微偏向一侧，表情放松 - 中上：面对镜头，随意的中间动作（头发或身体轻微移动） - 右上：轻微的侧面角度，柔和的注视，自然的抓拍感 中间行：- 中左：微微向上看，柔和的沉思表情 - 正中：特写肖像，直接的眼神接触，温柔的偶像微笑 - 中右：身体微微转动，中间动作的抓拍帧 底行：- 左下：随意坐着或倚靠着，放松的姿势 - 中下：背部部分转向，越过肩膀看向镜头 - 右下：靠近画框站立，略带俏皮或柔和的表情 氛围：韩国偶像写真集 / 小卡美学，亲密、柔和、自然、日常的魅力。质量：超写实，8K 细节，微妙的模拟胶片颗粒感，自然的瑕疵，柔和梦幻的色调",
+    "images": [
+      "/assets/output/online_745a7acb2e.png"
+    ],
+    "timestamp": 1779509679.1561375,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS9GM5M1SZ7S4P45HH2QYXJ7",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_1a35c7010114.jpg",
+          "name": "400e9b265abe54e2d4ef167954b9f203_ai_ref_30b37beb81b1.jpg",
+          "role": "image_1"
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "一张电影感的海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，桌子边可以看到图片中的男人穿着痞帅的西装的虚化的侧影，咖啡杯中的咖啡连成一条断断续续的细线跳舞在男人的指尖，窗外有柔和阳光，细节丰富，真实摄影，浅景深",
+    "images": [
+      "/assets/output/online_3de5e6e9e3.png"
+    ],
+    "timestamp": 1779500253.0778384,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS97M51X3DY83B4P2TE9PDWZ",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_30b37beb81b1.jpg",
+          "name": "6883aa8d60469b009ae25beedb274de3.jpg",
+          "role": ""
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "一张电影感的海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，桌子边可以看到图片中的男人穿着痞帅的西装的虚化的侧影，咖啡杯中的咖啡连成一条断断续续的细线跳舞在男人的指尖，窗外有柔和阳光，细节丰富，真实摄影，浅景深",
+    "images": [
+      "/assets/output/online_ddb769b6b3.png"
+    ],
+    "timestamp": 1779500009.2729626,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "apimart",
+    "provider_name": "APIMART",
+    "task_id": "task_01KS97CSSC0VRGFKF6JKYKW7ND",
+    "request_id": null,
+    "params": {
+      "provider_id": "apimart",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_30b37beb81b1.jpg",
+          "name": "6883aa8d60469b009ae25beedb274de3.jpg",
+          "role": ""
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779450898_6140fb3954.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779450898_6140fb3954.png"
+    ],
+    "seed": 39368673535983,
+    "timestamp": 1779450898.0172365,
+    "type": "workflow-test",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 4,
+    "prompt_id": "58b3d039-cdb6-42ae-93a5-ee6887e1356b",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1118": {
+        "image": "ComfyUI_temp_mgutm_00001_.png"
+      },
+      "1109": {
+        "value": "女人张开双腿，有着性感自然的阴毛，一个男人阴茎插入女人阴道"
+      },
+      "832": {
+        "seed": 1479403273667256
+      }
+    }
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779450876_e8a24a33b5.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779450876_e8a24a33b5.png"
+    ],
+    "seed": 815215727411159,
+    "timestamp": 1779450876.1502619,
+    "type": "workflow-test",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 3,
+    "prompt_id": "71168c96-b919-461d-8537-e3cab57a372c",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1118": {
+        "image": "output-1.png"
+      },
+      "1109": {
+        "value": "女人张开双腿，有着性感自然的阴毛，一个男人阴茎插入女人阴道"
+      },
+      "832": {
+        "seed": 930644996425706
+      }
+    }
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779450845_c9690a5090.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779450845_c9690a5090.png"
+    ],
+    "seed": 884829609511116,
+    "timestamp": 1779450845.64429,
+    "type": "workflow-test",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 2,
+    "prompt_id": "2da51df0-88b9-4f27-b32a-5bb51ac3c3d9",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1118": {
+        "image": "ComfyUI_temp_mgutm_00001_.png"
+      },
+      "1109": {
+        "value": "女人张开双腿，有着性感自然的阴毛，一个男人阴茎插入女人阴道"
+      },
+      "832": {
+        "seed": 1437534906620707
+      }
+    }
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779450784_514d0b8b2e.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779450784_514d0b8b2e.png"
+    ],
+    "seed": 745325016515078,
+    "timestamp": 1779450784.4966176,
+    "type": "workflow-test",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 1,
+    "prompt_id": "0e1b9962-0546-432e-b922-d99d17fd1fe9",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1118": {
+        "image": "ComfyUI_temp_mgutm_00001_.png"
+      },
+      "1109": {
+        "value": "女人张开双腿，有着性感自然的阴毛，一个男人阴茎插入女人阴道"
+      },
+      "832": {
+        "seed": 814860411257200
+      }
+    }
+  },
+  {
+    "prompt": "一张电影感的海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，桌子边可以看到图片中的男人穿着痞帅的西装的虚化的侧影，咖啡杯中的咖啡连成一条断断续续的细线跳舞在男人的指尖，窗外有柔和阳光，细节丰富，真实摄影，浅景深",
+    "images": [
+      "/assets/output/online_3a535a9b97.png"
+    ],
+    "timestamp": 1779449887.421501,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "fhl",
+    "provider_name": "FHL",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "fhl",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_30b37beb81b1.jpg",
+          "name": "6883aa8d60469b009ae25beedb274de3.jpg",
+          "role": ""
+        }
+      ]
+    },
+    "raw_usage": {
+      "input_tokens": 1358,
+      "input_tokens_details": {
+        "image_tokens": 1200,
+        "text_tokens": 158
+      },
+      "output_tokens": 1756,
+      "output_tokens_details": {
+        "image_tokens": 1756,
+        "text_tokens": 0
+      },
+      "total_tokens": 3114
+    }
+  },
+  {
+    "prompt": "一张电影感的海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，桌子边可以看到图片中的男人的虚化的侧面，咖啡杯中的咖啡连成一条断断续续的细线跳舞在男人的指尖，窗外有柔和阳光，细节丰富，真实摄影，浅景深，保持人物一致性",
+    "images": [
+      "/assets/output/online_3f32522deb.png"
+    ],
+    "timestamp": 1779449505.724799,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "fhl",
+    "provider_name": "FHL",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "fhl",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_30b37beb81b1.jpg",
+          "name": "6883aa8d60469b009ae25beedb274de3.jpg",
+          "role": ""
+        }
+      ]
+    },
+    "raw_usage": {
+      "input_tokens": 1408,
+      "input_tokens_details": {
+        "image_tokens": 1200,
+        "text_tokens": 208
+      },
+      "output_tokens": 1756,
+      "output_tokens_details": {
+        "image_tokens": 1756,
+        "text_tokens": 0
+      },
+      "total_tokens": 3164
+    }
+  },
+  {
+    "prompt": "一张电影感的海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，桌子边可以看到图片中的男人的虚化的侧面，咖啡杯中的咖啡连成一条断断续续的细线跳舞在男人的指尖，窗外有柔和阳光，细节丰富，真实摄影，浅景深，保持人物一致性",
+    "images": [
+      "/assets/output/online_4e421d4f9e.jpg"
+    ],
+    "timestamp": 1779449298.556114,
+    "type": "online",
+    "model": "gpt-image-2-1-4K",
+    "provider_id": "custom-api",
+    "provider_name": "汇取云",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "custom-api",
+      "model": "gpt-image-2-1-4K",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_30b37beb81b1.jpg",
+          "name": "6883aa8d60469b009ae25beedb274de3.jpg",
+          "role": ""
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "精修人物照片，一张电影感的海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，桌子边可以看到这个男人的虚化的侧面，咖啡杯中的咖啡连成一条断断续续的细线跳舞在男人的指尖，窗外有柔和阳光，细节丰富，真实摄影，浅景深，保持人物一致性",
+    "images": [
+      "/assets/output/online_204e1baf19.jpg"
+    ],
+    "timestamp": 1779449166.5948446,
+    "type": "online",
+    "model": "gpt-image-2-1-4K",
+    "provider_id": "custom-api",
+    "provider_name": "汇取云",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "custom-api",
+      "model": "gpt-image-2-1-4K",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_367d4888dce6.jpg",
+          "name": "be94ed3029049a0d7dad168d99c506a0.jpg",
+          "role": ""
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "精修人物照片，一张电影感的海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，桌子边可以看到这个男人的虚化的侧面，咖啡杯中的咖啡连成一条断断续续的细线跳舞在男人的指尖，窗外有柔和阳光，细节丰富，真实摄影，浅景深",
+    "images": [
+      "/assets/output/online_933d982cdc.jpg"
+    ],
+    "timestamp": 1779449070.6595008,
+    "type": "online",
+    "model": "gpt-image-2-1-4K",
+    "provider_id": "custom-api",
+    "provider_name": "汇取云",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "custom-api",
+      "model": "gpt-image-2-1-4K",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_367d4888dce6.jpg",
+          "name": "be94ed3029049a0d7dad168d99c506a0.jpg",
+          "role": ""
+        }
+      ]
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "精修人物照片，一张电影感的海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，桌子边可以看到这个男人的虚化的侧影，窗外有柔和阳光，细节丰富，真实摄影，浅景深",
+    "images": [
+      "/assets/output/online_a7f252350a.png"
+    ],
+    "timestamp": 1779447863.9804664,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "fhl",
+    "provider_name": "FHL",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "fhl",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": [
+        {
+          "url": "/assets/input/ai_ref_367d4888dce6.jpg",
+          "name": "be94ed3029049a0d7dad168d99c506a0.jpg",
+          "role": ""
+        }
+      ]
+    },
+    "raw_usage": {
+      "input_tokens": 1407,
+      "input_tokens_details": {
+        "image_tokens": 1200,
+        "text_tokens": 207
+      },
+      "output_tokens": 1756,
+      "output_tokens_details": {
+        "image_tokens": 1756,
+        "text_tokens": 0
+      },
+      "total_tokens": 3163
+    }
+  },
+  {
+    "prompt": "一张电影感的产品海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，窗外有柔和阳光，细节丰富，真实摄影，浅景深",
+    "images": [
+      "/assets/output/online_956524c2c9.png"
+    ],
+    "timestamp": 1779447488.8710742,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "fhl",
+    "provider_name": "FHL",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "fhl",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": []
+    },
+    "raw_usage": {
+      "input_tokens": 127,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 127
+      },
+      "output_tokens": 1756,
+      "output_tokens_details": {
+        "image_tokens": 1756,
+        "text_tokens": 0
+      },
+      "total_tokens": 1883
+    }
+  },
+  {
+    "prompt": "一张电影感的产品海报，玻璃质感的透明咖啡杯悬浮在清晨厨房中，窗外有柔和阳光，细节丰富，真实摄影，浅景深",
+    "images": [
+      "/assets/output/online_ca6fd16309.png"
+    ],
+    "timestamp": 1779447051.53013,
+    "type": "online",
+    "model": "gpt-image-2",
+    "provider_id": "custom-api",
+    "provider_name": "汇取云",
+    "task_id": null,
+    "request_id": null,
+    "params": {
+      "provider_id": "custom-api",
+      "model": "gpt-image-2",
+      "size": "1024x1024",
+      "quality": "auto",
+      "reference_images": []
+    },
+    "raw_usage": null
+  },
+  {
+    "prompt": "显示出女人的头部，女人有着性感自然的阴毛",
+    "images": [
+      "/assets/output/workflow-custom_1779446630_083ddfcf43.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-custom_1779446630_083ddfcf43.png"
+    ],
+    "seed": 12361069918027,
+    "timestamp": 1779446630.8933916,
+    "type": "workflow-custom",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 6,
+    "prompt_id": "76e9e41c-38f8-4119-a1b4-a9a1f6685492",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 848770366081514
+      },
+      "1109": {
+        "value": "显示出女人的头部，女人有着性感自然的阴毛"
+      },
+      "1118": {
+        "image": "ai_ref_3ddfd4025ce5.png"
+      }
+    }
+  },
+  {
+    "prompt": "显示出女人的头部，女人有着性感自然的阴毛",
+    "images": [
+      "/assets/output/workflow-custom_1779446617_71b831fea4.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-custom_1779446617_71b831fea4.png"
+    ],
+    "seed": 957987555860229,
+    "timestamp": 1779446617.7817814,
+    "type": "workflow-custom",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 5,
+    "prompt_id": "6869db67-d0c7-434c-9550-bddd70eb7f9e",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "832": {
+        "seed": 1250077275560707
+      },
+      "1109": {
+        "value": "显示出女人的头部，女人有着性感自然的阴毛"
+      },
+      "1118": {
+        "image": "ai_ref_3ddfd4025ce5.png"
+      }
+    }
+  },
+  {
+    "prompt": "显示出女人的头部，女人有着性感自然的阴毛",
+    "images": [
+      "/assets/output/workflow-custom_1779446583_d9731c3656.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-custom_1779446583_d9731c3656.png"
+    ],
+    "seed": 175052823761142,
+    "timestamp": 1779446583.9419177,
+    "type": "workflow-custom",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 4,
+    "prompt_id": "e2b8acb1-f855-4001-9729-97fb17fac93b",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1109": {
+        "value": "显示出女人的头部，女人有着性感自然的阴毛"
+      },
+      "1118": {
+        "image": "ai_ref_3ddfd4025ce5.png"
+      }
+    }
+  },
+  {
+    "prompt": "显示出女人的头部，女人有着性感自然的阴毛",
+    "images": [
+      "/assets/output/workflow-custom_1779446553_079ee4cee8.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-custom_1779446553_079ee4cee8.png"
+    ],
+    "seed": 792594387425516,
+    "timestamp": 1779446553.7087562,
+    "type": "workflow-custom",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 3,
+    "prompt_id": "bc7ba3f5-d86e-4a4b-9213-4ee96aaa3fe4",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1109": {
+        "value": "显示出女人的头部，女人有着性感自然的阴毛"
+      },
+      "1118": {
+        "image": "ai_ref_3ddfd4025ce5.png"
+      }
+    }
+  },
+  {
+    "prompt": "显示出女人的头部，女人有着性感自然的阴毛",
+    "images": [
+      "/assets/output/workflow-custom_1779446549_5c48637060.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-custom_1779446549_5c48637060.png"
+    ],
+    "seed": 951884970180460,
+    "timestamp": 1779446549.2456403,
+    "type": "workflow-custom",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 2,
+    "prompt_id": "7e45f772-03f1-4bdf-8f2e-a9294670fc95",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1109": {
+        "value": "显示出女人的头部，女人有着性感自然的阴毛"
+      },
+      "1118": {
+        "image": "ai_ref_3ddfd4025ce5.png"
+      }
+    }
+  },
+  {
+    "prompt": "Detail Enhance",
+    "images": [
+      "/assets/output/workflow-test_1779446338_62847d339d.png"
+    ],
+    "videos": [],
+    "outputs": [
+      "/assets/output/workflow-test_1779446338_62847d339d.png"
+    ],
+    "seed": 572135769903162,
+    "timestamp": 1779446338.9207962,
+    "type": "workflow-test",
+    "workflow_json": "custom/画布api2.json",
+    "task_id": 1,
+    "prompt_id": "7ff67227-df0d-46bf-baa1-cf0fcec0dc7f",
+    "backend": "192.168.0.88:8188",
+    "params": {
+      "1118": {
+        "image": "image (84).png"
+      },
+      "1109": {
+        "value": "女人躺坐在沙发上，一个男人站在沙发边，男人将女人双腿张开，阴茎插入女人阴道，女人阴道边有着性感的自然阴毛，阴道边和阴茎上都是湿润的"
+      }
+    }
+  }
+]
