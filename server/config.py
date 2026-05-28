@@ -1,6 +1,10 @@
 import os
 import re
 import uuid
+from threading import Lock
+
+# --- 全局锁 ---
+GLOBAL_CONFIG_LOCK = Lock()
 
 # --- 路径常量 ---
 CLIENT_ID = str(uuid.uuid4())
