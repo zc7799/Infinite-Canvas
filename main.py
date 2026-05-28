@@ -61,6 +61,9 @@ from server.config import (
     BACKEND_LOCAL_LOAD,
 )
 from server.exceptions import AppError, ProviderError, MediaError
+from server.data.history_store import HistoryStore
+
+history_store = HistoryStore(HISTORY_FILE)
 
 QUIET_ACCESS_PATHS = {
     "/api/queue_status",
@@ -202,7 +205,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str = None):
 # Locks and queue (will be migrated to respective stores)
 QUEUE = []
 QUEUE_LOCK = Lock()
-HISTORY_LOCK = Lock()
 GLOBAL_CONFIG_LOCK = Lock()
 CONVERSATION_LOCK = Lock()
 CANVAS_LOCK = Lock()
@@ -1654,18 +1656,8 @@ def collect_comfy_file_items(node_output):
     return items
 
 def save_to_history(record):
-    with HISTORY_LOCK:
-        history = []
-        if os.path.exists(HISTORY_FILE):
-            try:
-                with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-                    history = json.load(f)
-            except: pass
-        if "timestamp" not in record:
-            record["timestamp"] = time.time()
-        history.insert(0, record)
-        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-            json.dump(history[:5000], f, ensure_ascii=False, indent=4)
+    """将记录添加到历史存储（委托给 HistoryStore 原子写入）"""
+    history_store.add(record)
 
 def get_comfy_history(comfy_address, prompt_id):
     try:
@@ -5551,26 +5543,11 @@ async def chat_stream(payload: ChatRequest, request: Request, x_user_id: str = H
 
 @app.get("/api/history")
 async def get_history_api(type: str = None):
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                if type:
-                    data = [item for item in data if item.get("type", "zimage") == type]
-                data = [item for item in data if item.get("images") and len(item["images"]) > 0]
-
-                def sort_key(item):
-                    ts = item.get("timestamp", 0)
-                    if isinstance(ts, (int, float)):
-                        return float(ts)
-                    return 0
-
-                data.sort(key=sort_key, reverse=True)
-                return data
-        except Exception as e:
-            print(f"读取历史文件失败: {e}")
-            return []
-    return []
+    try:
+        return history_store.list(type_filter=type)
+    except Exception as e:
+        print(f"读取历史文件失败: {e}")
+        return []
 
 @app.get("/api/queue_status")
 async def get_queue_status(client_id: str):
@@ -5582,30 +5559,8 @@ async def get_queue_status(client_id: str):
 
 @app.post("/api/history/delete")
 async def delete_history(req: DeleteHistoryRequest):
-    if not os.path.exists(HISTORY_FILE):
-        return {"success": False, "message": "History file not found"}
     try:
-        with HISTORY_LOCK:
-            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-                history = json.load(f)
-            target_record = None
-            new_history = []
-            for item in history:
-                is_match = False
-                item_ts = item.get("timestamp", 0)
-                if isinstance(req.timestamp, (int, float)) and isinstance(item_ts, (int, float)):
-                    if abs(float(item_ts) - float(req.timestamp)) < 0.001:
-                        is_match = True
-                elif str(item_ts) == str(req.timestamp):
-                    is_match = True
-                if is_match:
-                    target_record = item
-                else:
-                    new_history.append(item)
-            if target_record:
-                with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-                    json.dump(new_history, f, ensure_ascii=False, indent=4)
-
+        target_record = history_store.delete_by_timestamp(req.timestamp)
         if target_record:
             for img_url in target_record.get("images", []):
                 file_path = output_file_from_url(img_url)
