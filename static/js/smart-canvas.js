@@ -244,14 +244,8 @@ const SIZE_MAP = {
 };
 const RES_LONG_SIDE = { '1k':1024, '2k':2048, '4k':3840 };
 const RES_PIXEL_LIMIT = { '1k':2359296, '2k':4194304, '4k':8294400 };
-function tr(key){ return window.StudioI18n?.t ? window.StudioI18n.t(key) : key; }
-function trf(key, values={}){
-    return Object.entries(values).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), tr(key));
-}
 function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
 function uid(prefix){ return `${prefix}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`; }
-function escapeHtml(str){ return String(str == null ? '' : str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
-const escapeAttr = escapeHtml;
 function cloneSmartSettings(source=settings){
     try {
         return JSON.parse(JSON.stringify(source || {}));

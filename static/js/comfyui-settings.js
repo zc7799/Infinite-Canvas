@@ -1,7 +1,3 @@
-function tr(key){ return window.StudioI18n ? window.StudioI18n.t(key) : key; }
-function tf(key, vars={}){
-    return Object.entries(vars).reduce((text, [k,v]) => text.replaceAll(`{${k}}`, v), tr(key));
-}
 function refreshLanguageView(){
     document.title = tr('comfy.title');
     renderList();
@@ -27,7 +23,6 @@ const TYPES = [
     { v:'audio', zh:'音频', en:'Audio' },
     { v:'boolean', zh:'开关', en:'Switch' },
 ];
-function currentLang(){ return window.StudioI18n?.lang?.() === 'en' ? 'en' : 'zh'; }
 function typeLabel(type){
     const item = TYPES.find(t => t.v === type);
     return item ? item[currentLang()] : type;
@@ -146,8 +141,6 @@ const previewCard = document.getElementById('previewContent');
 const miniCanvasHost = document.getElementById('miniCanvasHost');
 
 function setStatus(text){ statusEl.textContent = text || ''; }
-function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function escapeAttr(s){ return escapeHtml(s); }
 function fieldKind(f){
     if(['image','video','audio'].includes(f.type)) return f.type;
     const key = `${f.input || ''} ${f.name || ''}`.toLowerCase();

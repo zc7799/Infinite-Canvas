@@ -64,7 +64,6 @@ const RECOMMENDED_APIS = [
 ];
 
 function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
-function tr(key){ return window.StudioI18n ? window.StudioI18n.t(key) : key; }
 function setStatus(text){ statusEl.textContent = text || ''; }
 function rhEditorSideScrollEl(){
     return rhWorkflowEditorNodeList?.closest?.('.rh-workflow-editor-side') || rhWorkflowEditorNodeList;
@@ -2278,10 +2277,6 @@ async function saveProviders(){
         return false;
     }
 }
-function escapeHtml(str){
-    return String(str || '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-}
-function escapeAttr(str){ return escapeHtml(str).replace(/`/g, '&#96;'); }
 window.addEventListener('message', event => {
     if(event.data?.type === 'studio-theme' && window.StudioTheme) window.StudioTheme.set(event.data.theme);
     if(event.data?.type === 'studio-lang' && window.StudioI18n) {

@@ -1,10 +1,5 @@
 function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
 refreshIcons();
-function tr(key){ return window.StudioI18n ? StudioI18n.t(key) : key; }
-function trf(key, values={}){
-    return Object.entries(values).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), tr(key));
-}
-function langIsEn(){ return window.StudioI18n?.lang?.() === 'en'; }
 function actionFailed(labelKey, detail=''){
     const label = tr(labelKey);
     return langIsEn() ? `${label} failed${detail ? `: ${detail}` : ''}` : `${label}失败${detail ? `：${detail}` : ''}`;
@@ -10759,9 +10754,6 @@ function hasImageDropData(dataTransfer){
     return imageDropPayload(dataTransfer).type !== 'none';
 }
 function hasOutputImageDrag(dataTransfer){ return [...(dataTransfer?.types || [])].includes('application/x-canvas-output-image'); }
-function escapeHtml(str){ return String(str == null ? '' : str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
-function escapeAttr(str){ return escapeHtml(str); }
-
 window.onload = async () => {
     applyTheme(localStorage.getItem('studio_theme') || localStorage.getItem(CANVAS_THEME_KEY) || 'light');
     applyQuickToolbarState();

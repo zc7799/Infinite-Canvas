@@ -17,12 +17,13 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=2026.05.27.2"></script>
-    <script src="/static/vendor/js/lucide.js?v=2026.05.27.2"></script>
-    <script src="/static/js/theme.js?v=2026.05.27.2"></script>
-    <script src="/static/js/i18n.js?v=2026.05.27.2"></script>
-    <script src="/static/js/image-preview.js?v=2026.05.27.2"></script>
-    <script src="/static/js/history-bulk-manager.js?v=2026.05.27.2"></script>
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=2026.05.28"></script>
+    <script src="/static/vendor/js/lucide.js?v=2026.05.28"></script>
+    <script src="/static/js/theme.js?v=2026.05.28"></script>
+    <script src="/static/js/i18n.js?v=2026.05.28"></script>
+    <script src="/static/js/common.js?v=2026.05.28"></script>
+    <script src="/static/js/image-preview.js?v=2026.05.28"></script>
+    <script src="/static/js/history-bulk-manager.js?v=2026.05.28"></script>
     <style>
         :root {
             --bg-base: #f8f8f8;
@@ -175,7 +176,7 @@
             display: none;
         }
     </style>
-    <link rel="stylesheet" href="/static/css/theme.css?v=2026.05.27.2">
+    <link rel="stylesheet" href="/static/css/theme.css?v=2026.05.28">
 </head>
 
 <body class="antialiased">
@@ -288,7 +289,6 @@
 
     <script>
         lucide.createIcons();
-        function tr(key){ return window.StudioI18n ? StudioI18n.t(key) : key; }
         function applyLanguage(lang){
             if(lang && window.StudioI18n) StudioI18n.set(lang);
             document.title = tr('nav.textToImage');
