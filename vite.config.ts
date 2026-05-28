@@ -19,6 +19,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        'api-settings': resolve(__dirname, 'src/pages/api-settings/index.html'),
         // Additional page entries will be added as they are migrated
       },
     },
