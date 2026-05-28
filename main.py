@@ -63,10 +63,15 @@ from server.config import (
 )
 from server.exceptions import AppError, ProviderError, MediaError
 from server.data.history_store import history_store
+from server.data.conversation_store import (
+    CONVERSATION_LOCK, conversation_path, list_conversations,
+    load_conversation, new_conversation, safe_user_id, user_dir,
+)
 from server.ws.manager import ConnectionManager
 from server.routes.history import router as history_router
 from server.routes.provider import router as provider_router
 from server.routes.runninghub import router as runninghub_router
+from server.routes.conversation import router as conversation_router
 from server.services.media_service import (
     output_storage, output_url_for, output_path_for, output_file_from_url,
     origin_from_url, now_ms, sanitize_asset_name, sanitize_export_filename,
@@ -194,11 +199,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str = None):
 app.include_router(history_router)
 app.include_router(provider_router)
 app.include_router(runninghub_router)
+app.include_router(conversation_router)
 
 # Locks and queue (will be migrated to respective stores)
 QUEUE = []
 QUEUE_LOCK = Lock()
-CONVERSATION_LOCK = Lock()
 CANVAS_LOCK = Lock()
 LOAD_LOCK = Lock()
 NEXT_TASK_ID = 1
@@ -866,73 +871,8 @@ def get_comfy_history(comfy_address, prompt_id):
     except Exception as e:
         return {}
 
-def safe_user_id(user_id, request: Request):
-    candidate = (user_id or "").strip()
-    if not candidate and request.client:
-        candidate = f"ip-{request.client.host}"
-    if not candidate:
-        candidate = "anonymous"
-    candidate = re.sub(r"[^a-zA-Z0-9_.-]", "-", candidate)[:80].strip(".-")
-    return candidate or "anonymous"
-
-def user_dir(user_id):
-    path = os.path.join(CONVERSATION_DIR, user_id)
-    os.makedirs(path, exist_ok=True)
-    return path
-
-def conversation_path(user_id, conversation_id):
-    cleaned = re.sub(r"[^a-zA-Z0-9_-]", "", conversation_id or "")
-    if not cleaned:
-        raise HTTPException(status_code=400, detail="无效的对话 ID")
-    return os.path.join(user_dir(user_id), f"{cleaned}.json")
 
 
-def save_conversation(user_id, conversation):
-    with CONVERSATION_LOCK:
-        path = conversation_path(user_id, conversation["id"])
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(conversation, f, ensure_ascii=False, indent=2)
-
-def new_conversation(user_id, title="新对话"):
-    timestamp = now_ms()
-    conversation = {
-        "id": uuid.uuid4().hex,
-        "title": (title or "新对话")[:80],
-        "created_at": timestamp,
-        "updated_at": timestamp,
-        "messages": [],
-    }
-    save_conversation(user_id, conversation)
-    return conversation
-
-def load_conversation(user_id, conversation_id):
-    path = conversation_path(user_id, conversation_id)
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="对话不存在")
-    with open(path, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-def list_conversations(user_id):
-    records = []
-    for filename in os.listdir(user_dir(user_id)):
-        if not filename.endswith(".json"):
-            continue
-        path = os.path.join(user_dir(user_id), filename)
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except Exception:
-            continue
-        messages = data.get("messages", [])
-        last_message = next((m for m in reversed(messages) if m.get("role") != "system"), None)
-        records.append({
-            "id": data.get("id"),
-            "title": data.get("title", "新对话"),
-            "created_at": data.get("created_at", 0),
-            "updated_at": data.get("updated_at", 0),
-            "last_message": (last_message or {}).get("content", ""),
-        })
-    return sorted(records, key=lambda item: item["updated_at"], reverse=True)
 
 def canvas_path(canvas_id):
     cleaned = re.sub(r"[^a-zA-Z0-9_-]", "", canvas_id or "")
@@ -2809,29 +2749,6 @@ async def canvas_llm(payload: CanvasLLMRequest):
     return {"text": text, "model": model, "raw_usage": raw_data.get("usage")}
 
 # --- 对话管理 ---
-
-@app.get("/api/conversations")
-async def conversations(request: Request, x_user_id: str = Header(default="")):
-    user_id = safe_user_id(x_user_id, request)
-    return {"user_id": user_id, "conversations": list_conversations(user_id)}
-
-@app.post("/api/conversations")
-async def create_conversation(payload: ConversationCreateRequest, request: Request, x_user_id: str = Header(default="")):
-    user_id = safe_user_id(x_user_id, request)
-    return {"conversation": new_conversation(user_id, payload.title)}
-
-@app.get("/api/conversations/{conversation_id}")
-async def get_conversation(conversation_id: str, request: Request, x_user_id: str = Header(default="")):
-    user_id = safe_user_id(x_user_id, request)
-    return {"conversation": load_conversation(user_id, conversation_id)}
-
-@app.delete("/api/conversations/{conversation_id}")
-async def delete_conversation(conversation_id: str, request: Request, x_user_id: str = Header(default="")):
-    user_id = safe_user_id(x_user_id, request)
-    path = conversation_path(user_id, conversation_id)
-    if os.path.exists(path):
-        os.remove(path)
-    return {"ok": True}
 
 # --- 画布管理 ---
 
